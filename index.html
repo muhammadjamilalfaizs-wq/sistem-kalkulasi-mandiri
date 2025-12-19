@@ -131,15 +131,6 @@
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
 
-        .time-inputs {
-            display: flex;
-            gap: 15px;
-        }
-
-        .time-inputs > div {
-            flex: 1;
-        }
-
         .formula {
             background-color: #f8f9fa;
             padding: 15px;
@@ -384,13 +375,6 @@
                     <tbody id="attendance-data">
                         <!-- Data akan ditampilkan di sini -->
                     </tbody>
-                    <tfoot>
-                        <tr class="total-row">
-                            <td colspan="3">TOTAL</td>
-                            <td id="total-hours">0</td>
-                            <td colspan="2" id="total-overtime">Lembur: 0 jam</td>
-                        </tr>
-                    </tfoot>
                 </table>
                 
                 <div id="empty-message" class="empty-message">
@@ -418,6 +402,10 @@
                     <span id="estimated-salary">Rp 0</span>
                 </div>
             </div>
+            
+            <button id="reset-all-btn" class="btn-reset" style="margin-top: 20px; width: 100%;">
+                <i class="fas fa-trash-alt"></i> Hapus Semua Data
+            </button>
         </section>
     </div>
     
@@ -495,17 +483,14 @@
             const tbody = document.getElementById('attendance-data');
             const emptyMessage = document.getElementById('empty-message');
             const table = document.getElementById('attendance-table');
-            const tableFooter = document.querySelector('tfoot');
             
             if (attendanceData.length === 0) {
                 tbody.innerHTML = '';
                 emptyMessage.style.display = 'block';
                 table.style.display = 'none';
-                tableFooter.style.display = 'none';
             } else {
                 emptyMessage.style.display = 'none';
                 table.style.display = 'table';
-                tableFooter.style.display = 'table-footer-group';
                 
                 tbody.innerHTML = attendanceData.map((item, index) => `
                     <tr>
@@ -548,10 +533,6 @@
                     }
                 }
             });
-            
-            // Tampilkan total di tabel
-            document.getElementById('total-hours').textContent = totalHours.toFixed(1);
-            document.getElementById('total-overtime').textContent = Lembur: ${totalOvertime.toFixed(1)} jam;
             
             // Tampilkan perhitungan gaji
             document.getElementById('calc-total-hours').textContent = ${totalHours.toFixed(1)} jam;
@@ -613,6 +594,12 @@
             // Reset form
             this.reset();
             
+            // Set nilai default kembali
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            document.getElementById('start-time').value = '08:00';
+            document.getElementById('end-time').value = '17:00';
+            
             // Tampilkan pesan sukses
             alert('Data kehadiran berhasil ditambahkan!');
         });
@@ -620,6 +607,10 @@
         // Reset form
         document.getElementById('reset-form').addEventListener('click', function() {
             document.getElementById('attendance-form').reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            document.getElementById('start-time').value = '08:00';
+            document.getElementById('end-time').value = '17:00';
         });
 
         // Fungsi cetak
@@ -628,22 +619,14 @@
         });
 
         // Reset semua data
-        function resetAllData() {
+        document.getElementById('reset-all-btn').addEventListener('click', function() {
             if (confirm('Apakah Anda yakin ingin menghapus semua data? Tindakan ini tidak dapat dibatalkan.')) {
                 attendanceData = [];
                 saveData();
                 renderTable();
+                alert('Semua data telah dihapus!');
             }
-        }
-
-        // Tambahkan tombol reset semua data
-        const resetAllBtn = document.createElement('button');
-        resetAllBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Hapus Semua Data';
-        resetAllBtn.className = 'btn-reset';
-        resetAllBtn.style.marginTop = '15px';
-        resetAllBtn.style.width = '100%';
-        resetAllBtn.addEventListener('click', resetAllData);
-        document.querySelector('.result-section').appendChild(resetAllBtn);
+        });
 
         // Inisialisasi
         document.addEventListener('DOMContentLoaded', function() {
