@@ -3,388 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#2c3e50">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Catat Jam Kerja">
-    <meta name="description" content="Aplikasi pencatatan jam kerja, lembur, dan perhitungan gaji">
-    <meta name="keywords" content="jam kerja, lembur, gaji, kehadiran, PWA">
-    <meta name="author" content="Muhammad Jamil Al Faizs">
-    
-    <title>Catat Jam Kerja</title>
+    <title>Rekap Kehadiran Kerja</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
             background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
-            padding-bottom: 80px;
-        }
-
-        /* LOADING */
-        #loading {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, #2c3e50, #3498db);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s;
-        }
-        
-        .loader {
-            width: 50px; height: 50px;
-            border: 5px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* HEADER */
-        header {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            padding: 1.5rem 0;
-            text-align: center;
-            border-radius: 0 0 25px 25px;
-            margin-bottom: 1.5rem;
-            position: relative;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-        
-        .logo-icon {
-            font-size: 2.5rem;
-            background: rgba(255,255,255,0.2);
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-        
-        header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        header p {
-            font-size: 0.95rem;
-            opacity: 0.9;
-            max-width: 600px;
+            padding: 20px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
         }
-        
-        .pwa-controls {
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
             position: absolute;
-            top: 20px; right: 20px;
-            display: flex; gap: 10px;
-        }
-        
-        .pwa-btn {
-            width: 45px; height: 45px;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background-color: rgba(255, 255, 255, 0.05);
             border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            border: none; color: white;
-            cursor: pointer;
+            transform: translate(40%, -40%);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            transition: all 0.3s;
+            gap: 15px;
         }
-        
-        .pwa-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
+
+        h1 i {
+            font-size: 32px;
+            color: #3498db;
         }
-        
+
         .date-time {
             display: flex;
             align-items: center;
             gap: 15px;
-            font-size: 0.9rem;
+            font-size: 16px;
             margin-top: 10px;
-            justify-content: center;
-            color: rgba(255,255,255,0.9);
+            color: #ecf0f1;
         }
-        
+
         .date-time i {
             color: #3498db;
         }
 
-        /* OFFLINE NOTIFICATION */
-        #offlineNotification {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            background: #f39c12;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            z-index: 999;
-            display: none;
-        }
-        
-        #offlineNotification.show {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from { transform: translateY(-100%); }
-            to { transform: translateY(0); }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
         }
 
-        /* PWA INSTALL PROMPT */
-        #installPrompt {
-            position: fixed;
-            bottom: 20px; left: 20px; right: 20px;
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            z-index: 1001;
-            display: none;
-            border: 2px solid #3498db;
-        }
-        
-        #installPrompt.show {
-            display: block;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
         }
 
-        /* TABS & NAVIGATION */
-        .tabs {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .tab-btn {
-            padding: 12px 25px;
-            background: white;
-            border: none;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        
-        .tab-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-        
-        .tab-btn.active {
-            background: #2c3e50;
-            color: white;
-        }
-        
-        .mobile-nav {
-            display: none;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: white;
-            padding: 10px 15px;
-            z-index: 1000;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .mobile-nav-btn {
-            flex: 1;
-            background: none;
-            border: none;
-            padding: 8px 5px;
-            color: #95a5a6;
-            font-size: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .mobile-nav-btn.active {
-            color: #3498db;
-            font-weight: 600;
-        }
-        
-        .mobile-nav-btn i {
-            display: block;
-            font-size: 18px;
-            margin-bottom: 5px;
+        .form-section, .result-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
-        /* TAB CONTENT */
-        .tab-content {
-            display: none;
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin: 0 15px 1.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.4s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* SECTION TITLE */
         .section-title {
-            font-size: 1.5rem;
+            font-size: 22px;
             color: #2c3e50;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
             border-bottom: 2px solid #3498db;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .section-title i {
             color: #3498db;
         }
 
-        /* FORMULA */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
         .formula {
             background-color: #f8f9fa;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 25px;
             border-left: 4px solid #3498db;
+            position: relative;
         }
-        
+
         .formula h3 {
             color: #2c3e50;
             margin-bottom: 8px;
-            font-size: 1.1rem;
+            font-size: 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .formula p {
             color: #7f8c8d;
-            font-size: 0.9rem;
-            margin-top: 5px;
+            font-size: 15px;
+            margin-top: 10px;
         }
-        
+
         .edit-salary-btn {
             background-color: #3498db;
             color: white;
             border: none;
             border-radius: 4px;
             padding: 6px 12px;
-            font-size: 0.85rem;
+            font-size: 14px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        
+
         .edit-salary-btn:hover {
             background-color: #2980b9;
         }
-        
+
         .salary-input-container {
             display: none;
             margin-top: 15px;
             padding-top: 15px;
             border-top: 1px solid #ddd;
         }
-        
+
         .salary-input-group {
             display: flex;
             gap: 10px;
             align-items: center;
         }
 
-        /* FORM STYLES */
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #34495e;
-            font-size: 0.95rem;
-        }
-        
-        input, textarea, select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s;
-            background: white;
-            color: #333;
-        }
-        
-        input:focus, textarea:focus, select:focus {
-            border-color: #3498db;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+        .salary-input-group input {
+            flex: 1;
         }
 
-        /* BUTTONS */
         .buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 1.5rem;
+            gap: 15px;
+            margin-top: 30px;
             flex-wrap: wrap;
         }
-        
+
         button {
             padding: 14px 24px;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 6px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
@@ -393,559 +207,339 @@
             justify-content: center;
             gap: 10px;
         }
-        
+
         .btn-add {
             background-color: #2ecc71;
             color: white;
             flex: 2;
             min-width: 200px;
         }
-        
+
         .btn-add:hover {
             background-color: #27ae60;
             transform: translateY(-2px);
         }
-        
+
         .btn-reset {
             background-color: #e74c3c;
             color: white;
             flex: 1;
             min-width: 150px;
         }
-        
+
         .btn-reset:hover {
             background-color: #c0392b;
             transform: translateY(-2px);
         }
-        
+
         .btn-print {
             background-color: #3498db;
             color: white;
             flex: 1;
             min-width: 150px;
         }
-        
+
         .btn-print:hover {
             background-color: #2980b9;
             transform: translateY(-2px);
         }
-        
+
         .btn-export {
             background-color: #9b59b6;
             color: white;
             flex: 1;
             min-width: 150px;
         }
-        
+
         .btn-export:hover {
             background-color: #8e44ad;
             transform: translateY(-2px);
         }
-        
+
         .btn-feedback {
             background-color: #f39c12;
             color: white;
             flex: 1;
             min-width: 150px;
         }
-        
+
         .btn-feedback:hover {
             background-color: #e67e22;
             transform: translateY(-2px);
         }
-        
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 0.9rem;
-            min-height: 36px;
-        }
-        
-        .break-time-note {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            margin-top: 5px;
-            font-style: italic;
-        }
-        
-        .break-preset {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .break-preset-btn {
-            background-color: #95a5a6;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .break-preset-btn:hover {
-            background-color: #7f8c8d;
-        }
-        
-        .break-preset-btn.active {
-            background-color: #3498db;
-        }
-        
-        .break-info {
-            background-color: rgba(52,152,219,0.1);
-            padding: 10px 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #333;
-            border-left: 3px solid #3498db;
-        }
-        
-        .break-info i {
-            color: #3498db;
-            margin-right: 8px;
-        }
 
-        /* TABLE STYLES */
-        .empty-message {
-            text-align: center;
-            padding: 40px 20px;
-            color: #7f8c8d;
-            font-style: italic;
-        }
-        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1rem;
+            margin-top: 15px;
         }
-        
+
         th {
             background-color: #2c3e50;
             color: white;
-            padding: 12px 15px;
+            padding: 15px;
             text-align: left;
             font-weight: 600;
-            font-size: 0.9rem;
         }
-        
+
         td {
-            padding: 12px 15px;
+            padding: 15px;
             border-bottom: 1px solid #eee;
-            font-size: 0.9rem;
         }
-        
+
         tr:hover {
             background-color: #f9f9f9;
         }
-        
-        .delete-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: background-color 0.3s;
-        }
-        
-        .delete-btn:hover {
-            background-color: #c0392b;
+
+        .total-row {
+            background-color: #f8f9fa;
+            font-weight: bold;
         }
 
-        /* CALCULATION RESULT */
+        .total-row td {
+            border-top: 2px solid #3498db;
+        }
+
         .calculation-result {
             background-color: #f8f9fa;
             padding: 20px;
-            border-radius: 10px;
-            margin-top: 1.5rem;
+            border-radius: 8px;
+            margin-top: 25px;
             border-left: 4px solid #2ecc71;
         }
-        
+
         .calculation-result h3 {
             color: #2c3e50;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 20px;
         }
-        
+
         .result-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
             border-bottom: 1px dashed #ddd;
         }
-        
+
         .result-item:last-child {
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 18px;
             color: #2c3e50;
             border-bottom: none;
             padding-top: 10px;
             margin-top: 10px;
             border-top: 2px solid #3498db;
         }
-        
-        .current-salary {
-            color: #2ecc71;
-            font-weight: bold;
+
+        .empty-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+            font-style: italic;
         }
 
-        /* EXPORT SECTION */
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
         .export-section {
-            margin-top: 1.5rem;
+            margin-top: 30px;
             background-color: #f8f9fa;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 8px;
             border-left: 4px solid #9b59b6;
         }
-        
+
         .export-section h3 {
             color: #2c3e50;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-size: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .export-options {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
-        
+
+        @media (max-width: 600px) {
+            .export-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .export-btn {
             background-color: #9b59b6;
             color: white;
             border: none;
             border-radius: 6px;
-            padding: 12px 15px;
-            font-size: 0.9rem;
+            padding: 12px 20px;
+            font-size: 15px;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
         }
-        
+
         .export-btn:hover {
             background-color: #8e44ad;
             transform: translateY(-2px);
         }
-        
+
         .export-btn.csv {
             background-color: #2ecc71;
         }
-        
+
         .export-btn.csv:hover {
             background-color: #27ae60;
         }
-        
-        .export-btn.pdf {
-            background-color: #e74c3c;
-        }
-        
-        .export-btn.pdf:hover {
-            background-color: #c0392b;
-        }
-        
+
         .export-btn.excel {
             background-color: #3498db;
         }
-        
+
         .export-btn.excel:hover {
             background-color: #2980b9;
         }
-        
+
+        .export-btn.pdf {
+            background-color: #e74c3c;
+        }
+
+        .export-btn.pdf:hover {
+            background-color: #c0392b;
+        }
+
         .export-btn.print {
             background-color: #f39c12;
         }
-        
+
         .export-btn.print:hover {
             background-color: #e67e22;
         }
 
-        /* FEEDBACK SECTION */
-        .feedback-section {
-            margin-top: 1.5rem;
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #f39c12;
-        }
-        
-        .feedback-section h3 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .feedback-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .feedback-btn {
-            background-color: #f39c12;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 12px 15px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            flex: 1;
-            min-width: 180px;
-        }
-        
-        .feedback-btn:hover {
-            background-color: #e67e22;
-            transform: translateY(-2px);
-        }
-        
-        .feedback-btn.suggestion {
-            background-color: #3498db;
-        }
-        
-        .feedback-btn.suggestion:hover {
-            background-color: #2980b9;
-        }
-        
-        .feedback-btn.bug {
-            background-color: #e74c3c;
-        }
-        
-        .feedback-btn.bug:hover {
-            background-color: #c0392b;
-        }
-        
-        .feedback-btn.feature {
-            background-color: #2ecc71;
-        }
-        
-        .feedback-btn.feature:hover {
-            background-color: #27ae60;
-        }
-        
-        .developer-info {
-            background-color: rgba(52,152,219,0.1);
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-            font-size: 0.9rem;
-        }
-        
-        .developer-info h4 {
-            color: #2c3e50;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .email-link {
-            color: #3498db;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        .email-link:hover {
-            text-decoration: underline;
+        .break-time-note {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-style: italic;
         }
 
-        /* MODAL STYLES */
+        .break-preset {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .break-preset-btn {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .break-preset-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        .break-preset-btn.active {
+            background-color: #3498db;
+        }
+
         .modal {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            max-width: 500px;
+            z-index: 1000;
+            left: 0;
+            top: 0;
             width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
         }
-        
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
         .modal-content.large {
             max-width: 700px;
         }
-        
+
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #3498db;
         }
-        
+
         .modal-header h2 {
             color: #2c3e50;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 22px;
         }
-        
+
         .close-modal {
             background: none;
             border: none;
-            font-size: 1.8rem;
+            font-size: 28px;
             color: #7f8c8d;
             cursor: pointer;
-            transition: color 0.2s;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
+
         .close-modal:hover {
             color: #e74c3c;
         }
-        
-        .feedback-category {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .category-btn {
-            padding: 8px 16px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.85rem;
-        }
-        
-        .category-btn:hover {
-            border-color: #3498db;
-            background-color: #f8f9fa;
-        }
-        
-        .category-btn.active {
-            border-color: #3498db;
-            background-color: #3498db;
-            color: white;
-        }
-        
-        .star-rating {
-            display: flex;
-            gap: 8px;
-            margin: 15px 0;
-            justify-content: center;
-        }
-        
-        .star {
-            font-size: 24px;
-            color: #ddd;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        
-        .star:hover,
-        .star.active {
-            color: #f39c12;
-        }
-        
-        .rating-text {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 0.85rem;
-            color: #7f8c8d;
-        }
-        
-        .character-count {
-            text-align: right;
-            font-size: 0.75rem;
-            color: #7f8c8d;
-            margin-top: 5px;
-        }
-        
-        .success-message {
-            background-color: rgba(46,204,113,0.1);
-            color: #155724;
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 15px;
-            border-left: 4px solid #2ecc71;
-            display: none;
-        }
-        
-        .error-message {
-            background-color: rgba(231,76,60,0.1);
-            color: #721c24;
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 15px;
-            border-left: 4px solid #e74c3c;
-            display: none;
-        }
 
-        /* NOTIFICATION */
-        .notification {
-            position: fixed;
-            top: 20px; right: 20px;
-            background: #2c3e50;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            z-index: 3000;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideInRight 0.3s ease;
-        }
-        
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* FOOTER */
         footer {
             text-align: center;
-            padding: 1.5rem 20px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
             color: #7f8c8d;
-            font-size: 0.85rem;
-            margin-top: 1.5rem;
-            border-top: 1px solid #eee;
+            font-size: 14px;
         }
-        
+
         .footer-links {
             margin-top: 15px;
             display: flex;
             justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
+            gap: 20px;
         }
-        
+
         .footer-link {
             color: #3498db;
             text-decoration: none;
@@ -953,20 +547,23 @@
             align-items: center;
             gap: 8px;
             transition: color 0.3s;
-            font-size: 0.85rem;
         }
-        
+
         .footer-link:hover {
             color: #2980b9;
             text-decoration: underline;
         }
 
-        /* PRESET SALARIES */
+        .highlight {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
         .preset-salaries {
             margin-top: 10px;
-            font-size: 0.85rem;
+            font-size: 14px;
         }
-        
+
         .preset-btn {
             background-color: #95a5a6;
             color: white;
@@ -975,129 +572,230 @@
             padding: 4px 8px;
             margin-right: 5px;
             margin-bottom: 5px;
-            font-size: 0.8rem;
+            font-size: 13px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        
+
         .preset-btn:hover {
             background-color: #7f8c8d;
         }
 
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .tabs { display: none; }
-            .mobile-nav { display: flex; }
-            body { padding-bottom: 70px; }
-            .form-row { grid-template-columns: 1fr; }
-            header h1 { font-size: 1.5rem; }
-            .logo-icon { width: 50px; height: 50px; font-size: 2rem; }
-            .pwa-controls { top: 15px; right: 15px; }
-            .pwa-btn { width: 40px; height: 40px; font-size: 1rem; }
-            .tab-content { margin: 0 10px 1rem; padding: 1rem; }
-            .buttons button { min-width: 100%; }
-            .export-options { grid-template-columns: 1fr; }
-            .feedback-buttons .feedback-btn { min-width: 100%; }
-            .modal-content { padding: 1rem; }
-            .notification { left: 20px; right: 20px; top: auto; bottom: 90px; }
+        .current-salary {
+            color: #2ecc71;
+            font-weight: bold;
         }
-        
-        @media (min-width: 769px) {
-            .mobile-nav { display: none; }
-            .container {
-                max-width: 1200px;
-                margin: 0 auto;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 1.5rem;
-                padding: 0 15px;
-            }
-            .tab-content {
-                margin: 0 0 1.5rem;
-                grid-column: span 2;
-            }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: flex-end;
+        }
+
+        .break-info {
+            background-color: #e8f4fc;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 5px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .break-info i {
+            color: #3498db;
+            margin-right: 8px;
+        }
+
+        .feedback-section {
+            margin-top: 30px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #f39c12;
+        }
+
+        .feedback-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .feedback-btn:hover {
+            background-color: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .feedback-btn.suggestion {
+            background-color: #3498db;
+        }
+
+        .feedback-btn.suggestion:hover {
+            background-color: #2980b9;
+        }
+
+        .feedback-btn.bug {
+            background-color: #e74c3c;
+        }
+
+        .feedback-btn.bug:hover {
+            background-color: #c0392b;
+        }
+
+        .feedback-btn.feature {
+            background-color: #2ecc71;
+        }
+
+        .feedback-btn.feature:hover {
+            background-color: #27ae60;
+        }
+
+        .email-link {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .email-link:hover {
+            text-decoration: underline;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+
+        .star {
+            font-size: 28px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #f39c12;
+        }
+
+        .rating-text {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .developer-info {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .developer-info h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border-left: 4px solid #28a745;
+            display: none;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border-left: 4px solid #dc3545;
+            display: none;
+        }
+
+        .feedback-category {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .category-btn:hover {
+            border-color: #3498db;
+            background-color: #f8f9fa;
+        }
+
+        .category-btn.active {
+            border-color: #3498db;
+            background-color: #3498db;
+            color: white;
+        }
+
+        .character-count {
+            text-align: right;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading">
-        <div class="loader"></div>
-        <h2 style="color: white;">Aplikasi Pencatatan Jam Kerja</h2>
-        <p style="color: white; margin-top: 10px;">Memuat aplikasi...</p>
-    </div>
-    
-    <!-- Offline Notification -->
-    <div id="offlineNotification">
-        <i class="fas fa-wifi"></i> Anda sedang offline. Data akan disimpan lokal.
-    </div>
-    
-    <!-- PWA Install Prompt -->
-    <div id="installPrompt">
-        <h3><i class="fas fa-download"></i> Install Aplikasi</h3>
-        <p>Install aplikasi ini ke homescreen untuk pengalaman seperti aplikasi native!</p>
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button id="installCancel" class="btn-reset btn-small" style="flex: 1;">Nanti</button>
-            <button id="installConfirm" class="btn-add btn-small" style="flex: 1;">Install Sekarang</button>
-        </div>
-    </div>
-    
-    <!-- Header -->
     <header>
-        <div class="pwa-controls">
-            <button class="pwa-btn" id="themeToggle" title="Mode Gelap/Terang">
-                <i class="fas fa-moon"></i>
-            </button>
-            <button class="pwa-btn" id="installBtn" title="Install Aplikasi" style="display: none;">
-                <i class="fas fa-plus-circle"></i>
-            </button>
-            <button class="pwa-btn" id="shareBtn" title="Bagikan Aplikasi">
-                <i class="fas fa-share-alt"></i>
-            </button>
-        </div>
-        
-        <div class="logo-container">
-            <div class="logo-icon">
-                <i class="fas fa-clock"></i>
-            </div>
-            <div>
-                <h1>Catat Jam Kerja</h1>
-                <p>Pencatatan jam kerja, lembur, dan perhitungan gaji</p>
-            </div>
-        </div>
-        
+        <h1><i class="fas fa-clock"></i> Sistem Pencatatan Jam Kerja</h1>
+        <p>Catat dan hitung jam kerja serta lembur dengan mudah</p>
         <div class="date-time">
             <div><i class="far fa-calendar"></i> <span id="current-date">19 Desember 2025</span></div>
             <div><i class="far fa-clock"></i> <span id="current-time">05:31</span></div>
         </div>
     </header>
-    
-    <!-- Desktop Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="form-tab">
-            <i class="fas fa-edit"></i> Input Data
-        </button>
-        <button class="tab-btn" data-tab="result-tab">
-            <i class="fas fa-list-alt"></i> Rekap Data
-        </button>
-    </div>
-    
-    <!-- Mobile Navigation -->
-    <div class="mobile-nav">
-        <button class="mobile-nav-btn active" data-tab="form-tab">
-            <i class="fas fa-edit"></i>
-            <span>Input</span>
-        </button>
-        <button class="mobile-nav-btn" data-tab="result-tab">
-            <i class="fas fa-list-alt"></i>
-            <span>Rekap</span>
-        </button>
-    </div>
-    
-    <!-- Main Container -->
+
     <div class="container">
-        <!-- Form Tab -->
-        <section class="tab-content active" id="form-tab">
+        <section class="form-section">
             <h2 class="section-title"><i class="fas fa-edit"></i> Input Data Kehadiran</h2>
             
             <div class="formula">
@@ -1112,7 +810,7 @@
                 <div class="salary-input-container" id="salary-input-container">
                     <div class="salary-input-group">
                         <input type="number" id="monthly-salary" placeholder="Masukkan gaji bulanan" min="100000" step="50000">
-                        <button type="button" id="save-salary-btn" class="btn-add btn-small">
+                        <button type="button" id="save-salary-btn" class="btn-add" style="padding: 10px 15px;">
                             <i class="fas fa-save"></i> Simpan
                         </button>
                     </div>
@@ -1129,21 +827,19 @@
             </div>
             
             <form id="attendance-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="date"><i class="far fa-calendar-alt"></i> Tanggal</label>
-                        <input type="date" id="date" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="start-time"><i class="far fa-clock"></i> Jam Mulai</label>
-                        <input type="time" id="start-time" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="end-time"><i class="far fa-clock"></i> Jam Selesai</label>
-                        <input type="time" id="end-time" required>
-                    </div>
+                <div class="form-group">
+                    <label for="date"><i class="far fa-calendar-alt"></i> Tanggal</label>
+                    <input type="date" id="date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="start-time"><i class="far fa-clock"></i> Jam Mulai</label>
+                    <input type="time" id="start-time" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="end-time"><i class="far fa-clock"></i> Jam Selesai</label>
+                    <input type="time" id="end-time" required>
                 </div>
                 
                 <div class="form-group">
@@ -1171,11 +867,9 @@
                     </div>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="overtime"><i class="fas fa-business-time"></i> Jam Lembur (jika ada)</label>
-                        <input type="number" id="overtime" min="0" step="0.5" placeholder="Contoh: 3.5">
-                    </div>
+                <div class="form-group">
+                    <label for="overtime"><i class="fas fa-business-time"></i> Jam Lembur (jika ada)</label>
+                    <input type="number" id="overtime" min="0" step="0.5" placeholder="Contoh: 3.5">
                 </div>
                 
                 <div class="form-group">
@@ -1198,8 +892,7 @@
             </form>
         </section>
         
-        <!-- Result Tab -->
-        <section class="tab-content" id="result-tab">
+        <section class="result-section">
             <h2 class="section-title"><i class="fas fa-list-alt"></i> Rekap Kehadiran</h2>
             
             <div id="attendance-table-container">
@@ -1222,7 +915,7 @@
                 
                 <div id="empty-message" class="empty-message">
                     <i class="far fa-clipboard fa-3x" style="margin-bottom: 15px;"></i>
-                    <p>Belum ada data kehadiran. Silakan tambah data menggunakan form.</p>
+                    <p>Belum ada data kehadiran. Silakan tambah data menggunakan form di sebelah kiri.</p>
                 </div>
             </div>
             
@@ -1249,7 +942,7 @@
                     <span id="estimated-salary">Rp 0</span>
                 </div>
             </div>
-            
+
             <div class="export-section">
                 <h3><i class="fas fa-file-export"></i> Export Data</h3>
                 <div class="export-options">
@@ -1267,7 +960,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <div class="feedback-section">
                 <h3><i class="fas fa-comment-alt"></i> Kritik & Saran</h3>
                 <p>Bantu kami meningkatkan aplikasi ini dengan mengirimkan kritik dan saran Anda.</p>
@@ -1283,7 +976,7 @@
                         <i class="fas fa-lightbulb"></i> Saran Fitur
                     </button>
                 </div>
-                
+
                 <div class="developer-info">
                     <h4><i class="fas fa-user-tie"></i> Informasi Developer</h4>
                     <p>Email: <a href="mailto:muhammadjamilalfaizs@gmail.com" class="email-link">muhammadjamilalfaizs@gmail.com</a></p>
@@ -1291,13 +984,13 @@
                 </div>
             </div>
             
-            <button id="reset-all-btn" class="btn-reset" style="width: 100%; margin-top: 20px;">
+            <button id="reset-all-btn" class="btn-reset" style="margin-top: 20px; width: 100%;">
                 <i class="fas fa-trash-alt"></i> Hapus Semua Data
             </button>
         </section>
     </div>
-    
-    <!-- Export Modal -->
+
+    <!-- Modal Export CSV -->
     <div id="export-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1340,7 +1033,7 @@
                     </label>
                 </div>
                 
-                <div class="buttons" style="justify-content: flex-end;">
+                <div class="action-buttons">
                     <button id="confirm-export-csv" class="btn-add">
                         <i class="fas fa-download"></i> Download CSV
                     </button>
@@ -1351,8 +1044,8 @@
             </div>
         </div>
     </div>
-    
-    <!-- Feedback Modal -->
+
+    <!-- Modal Kritik & Saran -->
     <div id="feedback-modal" class="modal">
         <div class="modal-content large">
             <div class="modal-header">
@@ -1423,7 +1116,7 @@
                     <p><strong>Tujuan:</strong> Meningkatkan kualitas aplikasi untuk pengalaman pengguna yang lebih baik</p>
                 </div>
                 
-                <div class="buttons" style="justify-content: flex-end;">
+                <div class="action-buttons">
                     <button id="send-feedback" class="btn-add">
                         <i class="fas fa-paper-plane"></i> Kirim ke Developer
                     </button>
@@ -1436,7 +1129,7 @@
     </div>
     
     <footer>
-        <p>Dibuat dengan <i class="fas fa-heart" style="color:#e74c3c;"></i> untuk pencatatan jam kerja | © 2025 Sistem Pencatatan Kehadiran</p>
+        <p>Sistem Rekap Kehadiran Kerja Mandiri | © 2025 Sistem Pencatatan Kehadiran</p>
         
         <div class="footer-links">
             <a href="mailto:muhammadjamilalfaizs@gmail.com" class="footer-link">
@@ -1452,12 +1145,7 @@
     </footer>
 
     <script>
-        // ===== GLOBAL VARIABLES =====
-        const APP_NAME = "Catat Jam Kerja";
-        const APP_VERSION = "2.0";
-        const developerEmail = "muhammadjamilalfaizs@gmail.com";
-        
-        // Data inisialisasi
+        // Inisialisasi data awal dengan field breakTime
         const initialData = [
             { date: "11/12/2025", hours: "08.00–17.00", breakTime: 1, overtime: 0, totalHours: 8, note: "Ttd kontrak" },
             { date: "12/12/2025", hours: "07.00–16.00", breakTime: 1, overtime: 0, totalHours: 8, note: "Induction" },
@@ -1466,171 +1154,16 @@
             { date: "16/12/2025", hours: "18.00–08.00", breakTime: 1, overtime: 2.5, totalHours: 10.5, note: "" }
         ];
 
+        // Load data dari localStorage atau gunakan data awal
         let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || initialData;
+        
+        // Default gaji bulanan (5.500.000)
         let monthlySalary = parseInt(localStorage.getItem('monthlySalary')) || 5500000;
-        let deferredPrompt = null;
 
-        // ===== PWA FUNCTIONS =====
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('ServiceWorker registered:', registration.scope);
-                }).catch(function(err) {
-                    console.log('ServiceWorker registration failed:', err);
-                });
-            });
-        }
+        // Email developer
+        const developerEmail = "muhammadjamilalfaizs@gmail.com";
 
-        // Deteksi online/offline
-        window.addEventListener('online', function() {
-            document.getElementById('offlineNotification').classList.remove('show');
-            showNotification('Koneksi internet pulih', 'success');
-        });
-
-        window.addEventListener('offline', function() {
-            document.getElementById('offlineNotification').classList.add('show');
-            showNotification('Anda sedang offline', 'warning');
-        });
-
-        // PWA Install Prompt
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            setTimeout(() => {
-                if (deferredPrompt && !isPWAInstalled()) {
-                    document.getElementById('installBtn').style.display = 'flex';
-                    setTimeout(() => {
-                        document.getElementById('installPrompt').classList.add('show');
-                    }, 5000);
-                }
-            }, 3000);
-        });
-
-        window.addEventListener('appinstalled', () => {
-            deferredPrompt = null;
-            document.getElementById('installBtn').style.display = 'none';
-            document.getElementById('installPrompt').classList.remove('show');
-            showNotification('Aplikasi berhasil diinstall!', 'success');
-        });
-
-        function isPWAInstalled() {
-            return window.matchMedia('(display-mode: standalone)').matches || 
-                   window.navigator.standalone === true;
-        }
-
-        // ===== UTILITY FUNCTIONS =====
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}/${month}/${year}`;
-        }
-
-        function formatTime(startTime, endTime) {
-            const start = startTime.replace(':', '.');
-            const end = endTime.replace(':', '.');
-            return `${start}–${end}`;
-        }
-
-        function formatBreakTime(breakTime) {
-            if (breakTime === 0) return '-';
-            if (breakTime === 1) return '1 jam';
-            if (breakTime === 0.5) return '30 menit';
-            if (breakTime === 1.5) return '1.5 jam';
-            if (breakTime === 2) return '2 jam';
-            return `${breakTime} jam`;
-        }
-
-        function calculateHours(startTime, endTime, breakTime = 1) {
-            const [startHour, startMinute] = startTime.split(':').map(Number);
-            const [endHour, endMinute] = endTime.split(':').map(Number);
-            
-            let startTotalMinutes = startHour * 60 + startMinute;
-            let endTotalMinutes = endHour * 60 + endMinute;
-            
-            if (endTotalMinutes < startTotalMinutes) {
-                endTotalMinutes += 24 * 60;
-            }
-            
-            const totalMinutes = endTotalMinutes - startTotalMinutes;
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
-            
-            let totalHours = hours + (minutes / 60);
-            totalHours -= breakTime;
-            
-            return totalHours < 0 ? 0 : totalHours;
-        }
-
-        function formatRupiah(amount) {
-            return 'Rp ' + amount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-
-        function showNotification(message, type = 'info') {
-            // Remove existing notifications
-            document.querySelectorAll('.notification').forEach(n => n.remove());
-            
-            const notification = document.createElement('div');
-            notification.className = `notification`;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${type === 'success' ? '#2ecc71' : type === 'warning' ? '#f39c12' : type === 'danger' ? '#e74c3c' : '#3498db'};
-                color: white;
-                padding: 15px 25px;
-                border-radius: 10px;
-                box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-                z-index: 3000;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                animation: slideInRight 0.3s ease;
-            `;
-            
-            let icon = 'fas fa-info-circle';
-            if (type === 'success') icon = 'fas fa-check-circle';
-            if (type === 'warning') icon = 'fas fa-exclamation-triangle';
-            if (type === 'danger') icon = 'fas fa-times-circle';
-            
-            notification.innerHTML = `<i class="${icon}"></i><span>${message}</span>`;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => notification.remove(), 4000);
-        }
-
-        // ===== INITIALIZATION =====
-        document.addEventListener('DOMContentLoaded', function() {
-            setCurrentDateTime();
-            updateDateTime();
-            setInterval(updateDateTime, 60000);
-            updateSalaryDisplay();
-            renderTable();
-            setupEventListeners();
-            
-            setTimeout(() => {
-                document.getElementById('loading').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('loading').style.display = 'none';
-                }, 500);
-            }, 1000);
-
-            if (isPWAInstalled()) {
-                document.getElementById('installBtn').style.display = 'none';
-            }
-        });
-
-        function setCurrentDateTime() {
-            const today = new Date().toISOString().split('T')[0];
-            const now = new Date();
-            
-            document.getElementById('date').value = today;
-            document.getElementById('start-time').value = '08:00';
-            document.getElementById('end-time').value = '17:00';
-        }
-
+        // Update tanggal dan waktu secara real-time
         function updateDateTime() {
             const now = new Date();
             const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -1640,336 +1173,84 @@
             document.getElementById('current-time').textContent = now.toLocaleTimeString('id-ID', timeOptions);
         }
 
-        function updateSalaryDisplay() {
-            document.getElementById('formula-text').textContent = 
-                `${formatRupiah(monthlySalary)} : 173 x total jam kerja`;
-            document.getElementById('display-monthly-salary').textContent = formatRupiah(monthlySalary);
-            updateTotals();
+        // Format tanggal ke format DD/MM/YYYY
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return ${day}/${month}/${year};
         }
 
-        // ===== EVENT LISTENERS =====
-        function setupEventListeners() {
-            // PWA Controls
-            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-            document.getElementById('installBtn').addEventListener('click', showInstallPrompt);
-            document.getElementById('shareBtn').addEventListener('click', shareApp);
-            document.getElementById('installConfirm').addEventListener('click', installPWA);
-            document.getElementById('installCancel').addEventListener('click', () => {
-                document.getElementById('installPrompt').classList.remove('show');
-            });
+        // Format jam kerja
+        function formatTime(startTime, endTime) {
+            const start = startTime.replace(':', '.');
+            const end = endTime.replace(':', '.');
+            return ${start}–${end};
+        }
 
-            // Tabs
-            document.querySelectorAll('.tab-btn, .mobile-nav-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    document.querySelectorAll('.tab-btn, .mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                    
-                    button.classList.add('active');
-                    const tabId = button.getAttribute('data-tab');
-                    document.getElementById(tabId).classList.add('active');
-                    
-                    if (window.innerWidth <= 768) {
-                        window.scrollTo(0, 0);
-                    }
-                });
-            });
+        // Format jam istirahat untuk display
+        function formatBreakTime(breakTime) {
+            if (breakTime === 0) return '-';
+            if (breakTime === 1) return '1 jam';
+            if (breakTime === 0.5) return '30 menit';
+            if (breakTime === 1.5) return '1.5 jam';
+            if (breakTime === 2) return '2 jam';
+            return ${breakTime} jam;
+        }
 
-            // Form
-            document.getElementById('attendance-form').addEventListener('submit', handleFormSubmit);
-            document.getElementById('reset-form').addEventListener('click', resetForm);
-            document.getElementById('edit-salary-btn').addEventListener('click', toggleSalaryEdit);
-            document.getElementById('save-salary-btn').addEventListener('click', saveSalary);
+        // Hitung total jam dari waktu mulai dan selesai dengan dikurangi istirahat
+        function calculateHours(startTime, endTime, breakTime = 1) {
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const [endHour, endMinute] = endTime.split(':').map(Number);
             
-            // Presets
-            document.querySelectorAll('.preset-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    monthlySalary = parseInt(this.getAttribute('data-salary'));
-                    localStorage.setItem('monthlySalary', monthlySalary);
-                    updateSalaryDisplay();
-                    showNotification(`Gaji diubah menjadi ${formatRupiah(monthlySalary)}`, 'success');
-                });
-            });
-
-            document.querySelectorAll('.break-preset-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const breakTime = this.getAttribute('data-break');
-                    document.getElementById('break-time').value = breakTime;
-                    document.querySelectorAll('.break-preset-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    if (breakTime !== 'custom') {
-                        document.getElementById('custom-break-container').style.display = 'none';
-                    }
-                });
-            });
-
-            document.getElementById('break-time').addEventListener('change', function() {
-                if (this.value === 'custom') {
-                    document.getElementById('custom-break-container').style.display = 'block';
-                    document.querySelectorAll('.break-preset-btn').forEach(btn => btn.classList.remove('active'));
-                } else {
-                    document.getElementById('custom-break-container').style.display = 'none';
-                    const breakTime = this.value;
-                    document.querySelectorAll('.break-preset-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                        if (btn.getAttribute('data-break') === breakTime) {
-                            btn.classList.add('active');
-                        }
-                    });
-                }
-            });
-
-            // Export
-            document.getElementById('export-csv-btn').addEventListener('click', () => {
-                document.getElementById('export-modal').style.display = 'flex';
-            });
-            document.getElementById('export-csv').addEventListener('click', () => {
-                document.getElementById('export-modal').style.display = 'flex';
-            });
-            document.getElementById('confirm-export-csv').addEventListener('click', exportToCSV);
-            document.getElementById('cancel-export').addEventListener('click', () => {
-                document.getElementById('export-modal').style.display = 'none';
-            });
-
-            // Feedback
-            document.getElementById('feedback-btn').addEventListener('click', () => openFeedbackModal('suggestion'));
-            document.getElementById('send-feedback-btn').addEventListener('click', () => openFeedbackModal('suggestion'));
-            document.getElementById('report-bug-btn').addEventListener('click', () => openFeedbackModal('bug'));
-            document.getElementById('suggest-feature-btn').addEventListener('click', () => openFeedbackModal('feature'));
-            document.getElementById('send-feedback').addEventListener('click', sendFeedback);
-            document.getElementById('cancel-feedback').addEventListener('click', () => {
-                document.getElementById('feedback-modal').style.display = 'none';
-            });
-
-            // Footer links
-            document.getElementById('footer-feedback').addEventListener('click', (e) => {
-                e.preventDefault();
-                openFeedbackModal('suggestion');
-            });
-            document.getElementById('footer-bug').addEventListener('click', (e) => {
-                e.preventDefault();
-                openFeedbackModal('bug');
-            });
-
-            // Other buttons
-            document.getElementById('reset-all-btn').addEventListener('click', resetAllData);
-            document.getElementById('print-btn').addEventListener('click', () => window.print());
-
-            // Modals
-            document.querySelectorAll('.close-modal').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.closest('.modal').style.display = 'none';
-                });
-            });
-
-            window.addEventListener('click', function(event) {
-                if (event.target.classList.contains('modal')) {
-                    event.target.style.display = 'none';
-                }
-            });
-
-            // Feedback stars
-            document.querySelectorAll('.star').forEach(star => {
-                star.addEventListener('click', function() {
-                    const value = parseInt(this.getAttribute('data-value'));
-                    document.getElementById('feedback-rating').value = value;
-                    
-                    document.querySelectorAll('.star').forEach(s => {
-                        s.classList.remove('active');
-                        if (parseInt(s.getAttribute('data-value')) <= value) {
-                            s.classList.add('active');
-                        }
-                    });
-                });
-            });
-
-            // Character count
-            document.getElementById('feedback-message').addEventListener('input', function() {
-                const charCount = this.value.length;
-                document.getElementById('char-count').textContent = charCount;
-                
-                if (charCount > 1000) {
-                    this.value = this.value.substring(0, 1000);
-                    document.getElementById('char-count').textContent = 1000;
-                }
-            });
-
-            // Feedback categories
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-        }
-
-        // ===== CORE FUNCTIONS =====
-        function toggleTheme() {
-            const body = document.body;
-            const icon = document.querySelector('#themeToggle i');
+            let startTotalMinutes = startHour * 60 + startMinute;
+            let endTotalMinutes = endHour * 60 + endMinute;
             
-            if (body.classList.contains('dark-mode')) {
-                body.classList.remove('dark-mode');
-                body.style.backgroundColor = '#f5f7fa';
-                body.style.color = '#333';
-                icon.className = 'fas fa-moon';
-                showNotification('Mode terang diaktifkan', 'info');
-            } else {
-                body.classList.add('dark-mode');
-                body.style.backgroundColor = '#121212';
-                body.style.color = '#f0f0f0';
-                icon.className = 'fas fa-sun';
-                showNotification('Mode gelap diaktifkan', 'info');
-            }
-        }
-
-        function showInstallPrompt() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-            } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                showNotification('Untuk install di iOS: Buka di Safari → Share → "Add to Home Screen"', 'info');
-            } else if (/Android/i.test(navigator.userAgent)) {
-                showNotification('Untuk install di Android: Buka menu browser → "Add to Home screen"', 'info');
-            } else {
-                showNotification('Fitur install tersedia di Chrome/Edge desktop', 'info');
-            }
-        }
-
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-            }
-            document.getElementById('installPrompt').classList.remove('show');
-        }
-
-        async function shareApp() {
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: APP_NAME,
-                        text: 'Coba aplikasi pencatatan jam kerja ini!',
-                        url: window.location.href
-                    });
-                    showNotification('Aplikasi berhasil dibagikan', 'success');
-                } catch (err) {
-                    console.log('Error sharing:', err);
-                }
-            } else {
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    showNotification('Link aplikasi disalin ke clipboard', 'success');
-                });
-            }
-        }
-
-        function toggleSalaryEdit() {
-            const container = document.getElementById('salary-input-container');
-            const isVisible = container.style.display === 'block';
-            container.style.display = isVisible ? 'none' : 'block';
-            
-            if (!isVisible) {
-                document.getElementById('monthly-salary').value = monthlySalary;
-                document.getElementById('monthly-salary').focus();
-            }
-        }
-
-        function saveSalary() {
-            const salaryInput = document.getElementById('monthly-salary');
-            const newSalary = parseInt(salaryInput.value);
-            
-            if (!newSalary || newSalary < 100000) {
-                alert('Harap masukkan gaji yang valid (minimal Rp 100.000)');
-                return;
+            // Jika waktu selesai lebih kecil dari waktu mulai (melewati tengah malam)
+            if (endTotalMinutes < startTotalMinutes) {
+                endTotalMinutes += 24 * 60; // Tambah 24 jam
             }
             
-            monthlySalary = newSalary;
-            localStorage.setItem('monthlySalary', monthlySalary);
-            updateSalaryDisplay();
-            document.getElementById('salary-input-container').style.display = 'none';
-            showNotification(`Gaji berhasil diubah menjadi ${formatRupiah(monthlySalary)}`, 'success');
+            const totalMinutes = endTotalMinutes - startTotalMinutes;
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            
+            // Konversi ke desimal (0.5 untuk 30 menit)
+            let totalHours = hours + (minutes / 60);
+            
+            // Kurangi waktu istirahat
+            totalHours -= breakTime;
+            
+            // Pastikan tidak negatif
+            return totalHours < 0 ? 0 : totalHours;
         }
 
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            
-            const date = document.getElementById('date').value;
-            const startTime = document.getElementById('start-time').value;
-            const endTime = document.getElementById('end-time').value;
-            const breakTimeSelect = document.getElementById('break-time');
-            const breakTimeValue = breakTimeSelect.value;
-            const overtime = document.getElementById('overtime').value;
-            const note = document.getElementById('note').value;
-            
-            if (!date || !startTime || !endTime) {
-                alert('Harap isi tanggal, jam mulai, dan jam selesai!');
-                return;
-            }
-            
-            let breakTime = 0;
-            if (breakTimeValue === 'custom') {
-                const customBreakTime = parseFloat(document.getElementById('custom-break-time').value);
-                breakTime = isNaN(customBreakTime) ? 0 : customBreakTime;
-            } else {
-                breakTime = parseFloat(breakTimeValue);
-            }
-            
-            const formattedDate = formatDate(date);
-            const formattedHours = formatTime(startTime, endTime);
-            let totalHours = calculateHours(startTime, endTime, breakTime);
-            
-            let overtimeValue = 0;
-            if (overtime && parseFloat(overtime) > 0) {
-                overtimeValue = parseFloat(overtime);
-                totalHours += overtimeValue;
-            }
-            
-            attendanceData.push({
-                date: formattedDate,
-                hours: formattedHours,
-                breakTime: breakTime,
-                overtime: overtimeValue,
-                totalHours: totalHours,
-                note: note
-            });
-            
-            saveData();
-            renderTable();
-            resetForm();
-            
-            showNotification('Data kehadiran berhasil ditambahkan!', 'success');
+        // Format angka ke format Rupiah
+        function formatRupiah(amount) {
+            return 'Rp ' + amount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        function resetForm() {
-            const today = new Date().toISOString().split('T')[0];
-            
-            document.getElementById('attendance-form').reset();
-            document.getElementById('date').value = today;
-            document.getElementById('start-time').value = '08:00';
-            document.getElementById('end-time').value = '17:00';
-            document.getElementById('break-time').value = '1';
-            document.getElementById('custom-break-container').style.display = 'none';
-            
-            document.querySelectorAll('.break-preset-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-break') === '1') {
-                    btn.classList.add('active');
-                }
-            });
-        }
-
-        function resetAllData() {
-            if (confirm('Apakah Anda yakin ingin menghapus semua data? Tindakan ini tidak dapat dibatalkan.')) {
-                attendanceData = [];
-                saveData();
-                renderTable();
-                showNotification('Semua data kehadiran telah dihapus!', 'success');
-            }
-        }
-
+        // Simpan data ke localStorage
         function saveData() {
             localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
         }
 
-        // ===== TABLE FUNCTIONS =====
+        // Update tampilan gaji di halaman
+        function updateSalaryDisplay() {
+            // Update formula text
+            document.getElementById('formula-text').textContent = 
+                ${formatRupiah(monthlySalary)} : 173 x total jam kerja;
+            
+            // Update display gaji bulanan
+            document.getElementById('display-monthly-salary').textContent = 
+                formatRupiah(monthlySalary);
+            
+            // Update perhitungan
+            updateTotals();
+        }
+
+        // Tampilkan data ke dalam tabel
         function renderTable() {
             const tbody = document.getElementById('attendance-data');
             const emptyMessage = document.getElementById('empty-message');
@@ -1995,16 +1276,13 @@
                     </tr>
                 `).join('');
                 
-                // Add event listeners to delete buttons
+                // Tambahkan event listener untuk tombol hapus
                 document.querySelectorAll('.delete-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const index = parseInt(this.getAttribute('data-index'));
-                        if (confirm('Hapus data ini?')) {
-                            attendanceData.splice(index, 1);
-                            saveData();
-                            renderTable();
-                            showNotification('Data berhasil dihapus', 'success');
-                        }
+                        attendanceData.splice(index, 1);
+                        saveData();
+                        renderTable();
                     });
                 });
             }
@@ -2012,6 +1290,7 @@
             updateTotals();
         }
 
+        // Hitung dan perbarui total jam kerja
         function updateTotals() {
             let totalHours = 0;
             let totalOvertime = 0;
@@ -2025,83 +1304,156 @@
                 }
             });
             
-            document.getElementById('calc-total-hours').textContent = `${totalHours.toFixed(1)} jam`;
-            document.getElementById('calc-total-overtime').textContent = `${totalOvertime.toFixed(1)} jam`;
+            // Tampilkan perhitungan gaji
+            document.getElementById('calc-total-hours').textContent = ${totalHours.toFixed(1)} jam;
+            document.getElementById('calc-total-overtime').textContent = ${totalOvertime.toFixed(1)} jam;
             
+            // Hitung gaji per jam (monthlySalary / 173)
             const hourlyRate = monthlySalary / 173;
             document.getElementById('hourly-rate').textContent = formatRupiah(hourlyRate);
             
+            // Hitung perkiraan gaji
             const estimatedSalary = totalHours * hourlyRate;
             document.getElementById('estimated-salary').textContent = formatRupiah(estimatedSalary);
         }
 
-        // ===== EXPORT FUNCTIONS =====
-        function exportToCSV() {
+        // Fungsi untuk export data ke CSV
+        function exportToCSV(filename = 'rekap-kehadiran', includeSummary = true) {
             if (attendanceData.length === 0) {
-                showNotification('Tidak ada data untuk diexport!', 'warning');
-                document.getElementById('export-modal').style.display = 'none';
+                alert('Tidak ada data untuk diexport!');
                 return;
             }
             
+            // Header CSV (ditambah kolom Istirahat)
             let csvContent = "Tanggal,Jam Mulai-Selesai,Jam Istirahat,Jam Lembur,Total Jam,Keterangan\n";
             
+            // Data CSV
             attendanceData.forEach(item => {
                 const breakTime = formatBreakTime(item.breakTime);
                 const overtime = item.overtime === 0 ? '-' : item.overtime.toFixed(1).replace('.', ',');
                 const note = item.note ? item.note.replace(/,/g, ';') : '';
                 
-                csvContent += `${item.date},${item.hours},${breakTime},${overtime},${item.totalHours.toFixed(1)},${note}\n`;
+                csvContent += ${item.date},${item.hours},${breakTime},${overtime},${item.totalHours.toFixed(1)},${note}\n;
             });
             
-            // Add summary if checked
-            if (document.getElementById('include-summary').checked) {
-                csvContent += "\n\nRINGKASAN PERHITUNGAN GAJI\n";
-                csvContent += `Gaji Bulanan,${formatRupiah(monthlySalary)}\n`;
-                csvContent += `Total Jam Kerja,${document.getElementById('calc-total-hours').textContent}\n`;
-                csvContent += `Total Jam Lembur,${document.getElementById('calc-total-overtime').textContent}\n`;
-                csvContent += `Gaji per Jam,${document.getElementById('hourly-rate').textContent}\n`;
-                csvContent += `Perkiraan Gaji,${document.getElementById('estimated-salary').textContent}\n`;
+            // Tambah ringkasan jika diperlukan
+            if (includeSummary) {
+                let totalHours = 0;
+                let totalOvertime = 0;
+                let totalBreakTime = 0;
+                
+                attendanceData.forEach(item => {
+                    totalHours += parseFloat(item.totalHours);
+                    totalBreakTime += parseFloat(item.breakTime || 0);
+                    if (item.overtime && item.overtime > 0) {
+                        totalOvertime += parseFloat(item.overtime);
+                    }
+                });
+                
+                const hourlyRate = monthlySalary / 173;
+                const estimatedSalary = totalHours * hourlyRate;
+                
+                csvContent += "\n\nRINGKASAN\n";
+                csvContent += Gaji Bulanan,${formatRupiah(monthlySalary)}\n;
+                csvContent += Total Jam Kerja,${totalHours.toFixed(1)} jam\n;
+                csvContent += Total Jam Istirahat,${totalBreakTime.toFixed(1)} jam\n;
+                csvContent += Total Jam Lembur,${totalOvertime.toFixed(1)} jam\n;
+                csvContent += Gaji per Jam,${formatRupiah(hourlyRate)}\n;
+                csvContent += Perkiraan Gaji,${formatRupiah(estimatedSalary)}\n;
+                csvContent += Tanggal Export,${new Date().toLocaleDateString('id-ID')}\n;
             }
             
+            // Buat blob dan download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             
-            const filename = document.getElementById('export-filename').value || 'rekap-kehadiran';
             link.setAttribute("href", url);
-            link.setAttribute("download", `${filename}-${new Date().getTime()}.csv`);
+            link.setAttribute("download", ${filename}-${new Date().getTime()}.csv);
             link.style.visibility = 'hidden';
             
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            document.getElementById('export-modal').style.display = 'none';
-            showNotification('Data berhasil diexport ke CSV', 'success');
+            alert(Data berhasil diexport ke file ${filename}.csv);
         }
 
-        // ===== FEEDBACK FUNCTIONS =====
-        function openFeedbackModal(category = 'suggestion') {
-            resetFeedbackForm();
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-category') === category) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            let defaultSubject = '';
-            switch(category) {
-                case 'bug': defaultSubject = 'Laporan Bug'; break;
-                case 'feature': defaultSubject = 'Permintaan Fitur Baru'; break;
-                case 'criticism': defaultSubject = 'Kritik'; break;
-                default: defaultSubject = 'Saran';
+        // Fungsi untuk filter data berdasarkan tanggal
+        function filterDataByDateRange(rangeType, startDate = null, endDate = null) {
+            if (rangeType === 'all') {
+                return attendanceData;
             }
-            document.getElementById('feedback-subject').value = defaultSubject;
             
-            document.getElementById('feedback-modal').style.display = 'flex';
+            const now = new Date();
+            let filteredData = [];
+            
+            if (rangeType === 'week') {
+                // Data 7 hari terakhir
+                const oneWeekAgo = new Date(now);
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                
+                filteredData = attendanceData.filter(item => {
+                    const itemDate = parseDateString(item.date);
+                    return itemDate >= oneWeekAgo && itemDate <= now;
+                });
+            } else if (rangeType === 'month') {
+                // Data 30 hari terakhir
+                const oneMonthAgo = new Date(now);
+                oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+                
+                filteredData = attendanceData.filter(item => {
+                    const itemDate = parseDateString(item.date);
+                    return itemDate >= oneMonthAgo && itemDate <= now;
+                });
+            } else if (rangeType === 'custom' && startDate && endDate) {
+                // Data custom range
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                
+                filteredData = attendanceData.filter(item => {
+                    const itemDate = parseDateString(item.date);
+                    return itemDate >= start && itemDate <= end;
+                });
+            }
+            
+            return filteredData;
         }
 
+        // Parse date string dari format DD/MM/YYYY
+        function parseDateString(dateStr) {
+            const [day, month, year] = dateStr.split('/').map(Number);
+            return new Date(year, month - 1, day);
+        }
+
+        // Fungsi untuk mengirim feedback ke email developer
+        function sendFeedbackToDeveloper(feedbackData) {
+            // Format data untuk email
+            const subject = encodeURIComponent(feedbackData.subject);
+            const body = encodeURIComponent(
+                Kategori: ${feedbackData.category}\n +
+                Nama: ${feedbackData.name || 'Tidak diisi'}\n +
+                Email: ${feedbackData.email || 'Tidak diisi'}\n +
+                Rating: ${feedbackData.rating}/5\n +
+                Tanggal: ${new Date().toLocaleDateString('id-ID')}\n +
+                \n--- PESAN ---\n${feedbackData.message}\n +
+                \n--- INFO APLIKASI ---\n +
+                Jumlah Data Kehadiran: ${attendanceData.length}\n +
+                Gaji yang Diatur: ${formatRupiah(monthlySalary)}\n +
+                Versi Aplikasi: 2.0\n +
+                User Agent: ${navigator.userAgent.substring(0, 100)}
+            );
+            
+            // Buat link mailto
+            const mailtoLink = mailto:${developerEmail}?subject=${subject}&body=${body};
+            
+            // Buka email client
+            window.location.href = mailtoLink;
+            
+            return true;
+        }
+
+        // Reset form feedback
         function resetFeedbackForm() {
             document.getElementById('feedback-name').value = '';
             document.getElementById('feedback-email').value = '';
@@ -2109,56 +1461,302 @@
             document.getElementById('feedback-message').value = '';
             document.getElementById('feedback-rating').value = '0';
             document.getElementById('char-count').textContent = '0';
-            document.getElementById('feedback-success').style.display = 'none';
-            document.getElementById('feedback-error').style.display = 'none';
             
+            // Reset rating stars
             document.querySelectorAll('.star').forEach(star => {
                 star.classList.remove('active');
             });
+            
+            // Reset kategori
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector('.category-btn[data-category="suggestion"]').classList.add('active');
+            
+            // Sembunyikan pesan
+            document.getElementById('feedback-success').style.display = 'none';
+            document.getElementById('feedback-error').style.display = 'none';
         }
 
-        function sendFeedback() {
-            const name = document.getElementById('feedback-name').value.trim();
-            const email = document.getElementById('feedback-email').value.trim();
-            const subject = document.getElementById('feedback-subject').value.trim();
-            const message = document.getElementById('feedback-message').value.trim();
-            const rating = document.getElementById('feedback-rating').value;
-            const category = document.querySelector('.category-btn.active').getAttribute('data-category');
+        // Tambah data baru
+        document.getElementById('attendance-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const date = document.getElementById('date').value;
+            const startTime = document.getElementById('start-time').value;
+            const endTime = document.getElementById('end-time').value;
+            const breakTimeSelect = document.getElementById('break-time');
+            const breakTimeValue = breakTimeSelect.value;
+            const overtime = document.getElementById('overtime').value;
+            const note = document.getElementById('note').value;
             
             // Validasi
-            if (!subject || !message) {
-                alert('Harap isi subjek dan pesan');
+            if (!date || !startTime || !endTime) {
+                alert('Harap isi tanggal, jam mulai, dan jam selesai!');
                 return;
             }
             
-            // Simpan feedback ke localStorage
-            const feedbackData = {
-                name: name || 'Anonim',
-                email: email || '',
-                subject: subject,
-                message: message,
-                rating: rating,
-                category: category,
-                timestamp: new Date().toISOString()
-            };
+            // Hitung jam istirahat
+            let breakTime = 0;
+            if (breakTimeValue === 'custom') {
+                const customBreakTime = parseFloat(document.getElementById('custom-break-time').value);
+                breakTime = isNaN(customBreakTime) ? 0 : customBreakTime;
+            } else {
+                breakTime = parseFloat(breakTimeValue);
+            }
             
-            // Simpan ke localStorage
-            let feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
-            feedbacks.push(feedbackData);
-            localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
+            // Format data
+            const formattedDate = formatDate(date);
+            const formattedHours = formatTime(startTime, endTime);
+            
+            // Hitung total jam kerja (dikurangi istirahat)
+            let totalHours = calculateHours(startTime, endTime, breakTime);
+            
+            // Tambahkan jam lembur jika ada
+            let overtimeValue = 0;
+            if (overtime && parseFloat(overtime) > 0) {
+                overtimeValue = parseFloat(overtime);
+                totalHours += overtimeValue;
+            }
+            
+            // Tambahkan data ke array
+            attendanceData.push({
+                date: formattedDate,
+                hours: formattedHours,
+                breakTime: breakTime,
+                overtime: overtimeValue,
+                totalHours: totalHours,
+                note: note
+            });
+            
+            // Simpan dan render ulang
+            saveData();
+            renderTable();
+            
+            // Reset form
+            this.reset();
+            
+            // Set nilai default kembali
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            document.getElementById('start-time').value = '08:00';
+            document.getElementById('end-time').value = '17:00';
+            document.getElementById('break-time').value = '1';
+            
+            // Aktifkan preset tombol 1 jam
+            document.querySelectorAll('.break-preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-break') === '1') {
+                    btn.classList.add('active');
+                }
+            });
             
             // Tampilkan pesan sukses
-            document.getElementById('feedback-success').style.display = 'block';
-            document.getElementById('feedback-error').style.display = 'none';
+            alert('Data kehadiran berhasil ditambahkan!');
+        });
+
+        // Reset form
+        document.getElementById('reset-form').addEventListener('click', function() {
+            document.getElementById('attendance-form').reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            document.getElementById('start-time').value = '08:00';
+            document.getElementById('end-time').value = '17:00';
+            document.getElementById('break-time').value = '1';
             
-            // Reset form setelah 3 detik
-            setTimeout(() => {
-                document.getElementById('feedback-modal').style.display = 'none';
-                resetFeedbackForm();
-            }, 3000);
+            // Sembunyikan custom break input
+            document.getElementById('custom-break-container').style.display = 'none';
             
-            showNotification('Kritik dan saran berhasil dikirim', 'success');
-        }
-    </script>
-</body>
-</html>
+            // Reset tombol preset
+            document.querySelectorAll('.break-preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-break') === '1') {
+                    btn.classList.add('active');
+                }
+            });
+        });
+
+        // Fungsi cetak
+        document.getElementById('print-btn').addEventListener('click', function() {
+            window.print();
+        });
+
+        // Export CSV dengan modal
+        document.getElementById('export-csv-btn').addEventListener('click', function() {
+            document.getElementById('export-modal').style.display = 'block';
+        });
+
+        document.getElementById('export-csv').addEventListener('click', function() {
+            document.getElementById('export-modal').style.display = 'block';
+        });
+
+        // Export PDF (simulasi)
+        document.getElementById('export-pdf').addEventListener('click', function() {
+            alert('Fitur Export PDF akan segera hadir!');
+        });
+
+        // Export Excel (simulasi)
+        document.getElementById('export-excel').addEventListener('click', function() {
+            alert('Fitur Export Excel akan segera hadir!');
+        });
+
+        // Export Print (simulasi)
+        document.getElementById('export-print').addEventListener('click', function() {
+            window.print();
+        });
+
+        // Reset semua data
+        document.getElementById('reset-all-btn').addEventListener('click', function() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua data? Tindakan ini tidak dapat dibatalkan.')) {
+                attendanceData = [];
+                saveData();
+                renderTable();
+                alert('Semua data kehadiran telah dihapus!');
+            }
+        });
+
+        // Toggle form edit gaji
+        document.getElementById('edit-salary-btn').addEventListener('click', function() {
+            const salaryInputContainer = document.getElementById('salary-input-container');
+            const isVisible = salaryInputContainer.style.display === 'block';
+            
+            salaryInputContainer.style.display = isVisible ? 'none' : 'block';
+            
+            if (!isVisible) {
+                // Set nilai input saat form dibuka
+                document.getElementById('monthly-salary').value = monthlySalary;
+                document.getElementById('monthly-salary').focus();
+            }
+        });
+
+        // Simpan gaji baru
+        document.getElementById('save-salary-btn').addEventListener('click', function() {
+            const salaryInput = document.getElementById('monthly-salary');
+            const newSalary = parseInt(salaryInput.value);
+            
+            if (!newSalary || newSalary < 100000) {
+                alert('Harap masukkan gaji yang valid (minimal Rp 100.000)');
+                salaryInput.focus();
+                return;
+            }
+            
+            // Simpan gaji baru
+            monthlySalary = newSalary;
+            localStorage.setItem('monthlySalary', monthlySalary);
+            
+            // Update tampilan
+            updateSalaryDisplay();
+            
+            // Sembunyikan form input
+            document.getElementById('salary-input-container').style.display = 'none';
+            
+            // Tampilkan pesan sukses
+            alert(Gaji berhasil diubah menjadi ${formatRupiah(monthlySalary)});
+        });
+
+        // Tombol preset gaji
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const salary = parseInt(this.getAttribute('data-salary'));
+                monthlySalary = salary;
+                localStorage.setItem('monthlySalary', monthlySalary);
+                
+                // Update tampilan
+                updateSalaryDisplay();
+                
+                // Sembunyikan form input
+                document.getElementById('salary-input-container').style.display = 'none';
+                
+                // Tampilkan pesan
+                alert(Gaji berhasil diubah menjadi ${formatRupiah(monthlySalary)});
+            });
+        });
+
+        // Tombol preset istirahat
+        document.querySelectorAll('.break-preset-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const breakTime = this.getAttribute('data-break');
+                
+                // Update select box
+                document.getElementById('break-time').value = breakTime;
+                
+                // Update tombol aktif
+                document.querySelectorAll('.break-preset-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Sembunyikan custom input jika bukan custom
+                if (breakTime !== 'custom') {
+                    document.getElementById('custom-break-container').style.display = 'none';
+                }
+            });
+        });
+
+        // Handle perubahan pada select box istirahat
+        document.getElementById('break-time').addEventListener('change', function() {
+            if (this.value === 'custom') {
+                document.getElementById('custom-break-container').style.display = 'block';
+                
+                // Update tombol preset
+                document.querySelectorAll('.break-preset-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            } else {
+                document.getElementById('custom-break-container').style.display = 'none';
+                
+                // Update tombol preset
+                const breakTime = this.value;
+                document.querySelectorAll('.break-preset-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.getAttribute('data-break') === breakTime) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        });
+
+        // Modal functionality
+        const exportModal = document.getElementById('export-modal');
+        const feedbackModal = document.getElementById('feedback-modal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const cancelExportBtn = document.getElementById('cancel-export');
+        const confirmExportBtn = document.getElementById('confirm-export-csv');
+        const exportDateRange = document.getElementById('export-date-range');
+        const customDateRange = document.getElementById('custom-date-range');
+
+        // Tampilkan/sembunyikan custom date range
+        exportDateRange.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'block';
+                
+                // Set default tanggal
+                const today = new Date().toISOString().split('T')[0];
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                const oneWeekAgoStr = oneWeekAgo.toISOString().split('T')[0];
+                
+                document.getElementById('export-start-date').value = oneWeekAgoStr;
+                document.getElementById('export-end-date').value = today;
+            } else {
+                customDateRange.style.display = 'none';
+            }
+        });
+
+        // Tutup modal
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                modal.style.display = 'none';
+            });
+        });
+
+        cancelExportBtn.addEventListener('click', function() {
+            exportModal.style.display = 'none';
+        });
+
+        // Export konfirmasi
+        confirmExportBtn.addEventListener('click', function() {
+            const filename = document.getElementById('export-filename').value || 'rekap-kehadiran';
+            const dateRange = exportDateRange.value;
+            const includeSumm
