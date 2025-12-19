@@ -116,7 +116,7 @@
             color: #34495e;
         }
 
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #ddd;
@@ -125,7 +125,7 @@
             transition: border 0.3s;
         }
 
-        input:focus, textarea:focus {
+        input:focus, textarea:focus, select:focus {
             border-color: #3498db;
             outline: none;
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
@@ -137,23 +137,61 @@
             border-radius: 8px;
             margin-bottom: 25px;
             border-left: 4px solid #3498db;
+            position: relative;
         }
 
         .formula h3 {
             color: #2c3e50;
             margin-bottom: 8px;
             font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .formula p {
             color: #7f8c8d;
             font-size: 15px;
+            margin-top: 10px;
+        }
+
+        .edit-salary-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .edit-salary-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .salary-input-container {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .salary-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .salary-input-group input {
+            flex: 1;
         }
 
         .buttons {
             display: flex;
             gap: 15px;
             margin-top: 30px;
+            flex-wrap: wrap;
         }
 
         button {
@@ -174,6 +212,7 @@
             background-color: #2ecc71;
             color: white;
             flex: 2;
+            min-width: 200px;
         }
 
         .btn-add:hover {
@@ -185,6 +224,7 @@
             background-color: #e74c3c;
             color: white;
             flex: 1;
+            min-width: 150px;
         }
 
         .btn-reset:hover {
@@ -196,10 +236,23 @@
             background-color: #3498db;
             color: white;
             flex: 1;
+            min-width: 150px;
         }
 
         .btn-print:hover {
             background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-export {
+            background-color: #9b59b6;
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-export:hover {
+            background-color: #8e44ad;
             transform: translateY(-2px);
         }
 
@@ -289,6 +342,140 @@
             background-color: #c0392b;
         }
 
+        .export-section {
+            margin-top: 30px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #9b59b6;
+        }
+
+        .export-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .export-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .export-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .export-btn {
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .export-btn:hover {
+            background-color: #8e44ad;
+            transform: translateY(-2px);
+        }
+
+        .export-btn.csv {
+            background-color: #2ecc71;
+        }
+
+        .export-btn.csv:hover {
+            background-color: #27ae60;
+        }
+
+        .export-btn.excel {
+            background-color: #3498db;
+        }
+
+        .export-btn.excel:hover {
+            background-color: #2980b9;
+        }
+
+        .export-btn.pdf {
+            background-color: #e74c3c;
+        }
+
+        .export-btn.pdf:hover {
+            background-color: #c0392b;
+        }
+
+        .export-btn.print {
+            background-color: #f39c12;
+        }
+
+        .export-btn.print:hover {
+            background-color: #e67e22;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+            font-size: 22px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #7f8c8d;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: #e74c3c;
+        }
+
         footer {
             text-align: center;
             margin-top: 40px;
@@ -301,6 +488,40 @@
         .highlight {
             color: #e74c3c;
             font-weight: bold;
+        }
+
+        .preset-salaries {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .preset-btn {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .preset-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        .current-salary {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: flex-end;
         }
     </style>
 </head>
@@ -319,8 +540,31 @@
             <h2 class="section-title"><i class="fas fa-edit"></i> Input Data Kehadiran</h2>
             
             <div class="formula">
-                <h3>Rumus Perhitungan</h3>
-                <p>5.500.000 : 173 x total jam kerja</p>
+                <h3>
+                    <span>Rumus Perhitungan Gaji</span>
+                    <button class="edit-salary-btn" id="edit-salary-btn">
+                        <i class="fas fa-edit"></i> Edit Gaji
+                    </button>
+                </h3>
+                <p id="formula-text">5.500.000 : 173 x total jam kerja</p>
+                
+                <div class="salary-input-container" id="salary-input-container">
+                    <div class="salary-input-group">
+                        <input type="number" id="monthly-salary" placeholder="Masukkan gaji bulanan" min="100000" step="50000">
+                        <button type="button" id="save-salary-btn" class="btn-add" style="padding: 10px 15px;">
+                            <i class="fas fa-save"></i> Simpan
+                        </button>
+                    </div>
+                    
+                    <div class="preset-salaries">
+                        <p>Pilih gaji preset:</p>
+                        <button type="button" class="preset-btn" data-salary="4500000">Rp 4.500.000</button>
+                        <button type="button" class="preset-btn" data-salary="5500000">Rp 5.500.000</button>
+                        <button type="button" class="preset-btn" data-salary="6500000">Rp 6.500.000</button>
+                        <button type="button" class="preset-btn" data-salary="7500000">Rp 7.500.000</button>
+                        <button type="button" class="preset-btn" data-salary="8500000">Rp 8.500.000</button>
+                    </div>
+                </div>
             </div>
             
             <form id="attendance-form">
@@ -353,6 +597,7 @@
                     <button type="submit" class="btn-add"><i class="fas fa-plus-circle"></i> Tambah Data</button>
                     <button type="button" id="reset-form" class="btn-reset"><i class="fas fa-redo"></i> Reset Form</button>
                     <button type="button" id="print-btn" class="btn-print"><i class="fas fa-print"></i> Cetak</button>
+                    <button type="button" id="export-csv-btn" class="btn-export"><i class="fas fa-file-export"></i> Export</button>
                 </div>
             </form>
         </section>
@@ -386,6 +631,10 @@
             <div class="calculation-result">
                 <h3><i class="fas fa-calculator"></i> Perhitungan Gaji</h3>
                 <div class="result-item">
+                    <span>Gaji bulanan:</span>
+                    <span id="display-monthly-salary" class="current-salary">Rp 5.500.000</span>
+                </div>
+                <div class="result-item">
                     <span>Total jam kerja:</span>
                     <span id="calc-total-hours">0 jam</span>
                 </div>
@@ -394,12 +643,30 @@
                     <span id="calc-total-overtime">0 jam</span>
                 </div>
                 <div class="result-item">
-                    <span>Gaji per jam (5.500.000 / 173):</span>
+                    <span>Gaji per jam:</span>
                     <span id="hourly-rate">Rp 31.792</span>
                 </div>
                 <div class="result-item">
                     <span>Perkiraan gaji:</span>
                     <span id="estimated-salary">Rp 0</span>
+                </div>
+            </div>
+
+            <div class="export-section">
+                <h3><i class="fas fa-file-export"></i> Export Data</h3>
+                <div class="export-options">
+                    <button id="export-csv" class="export-btn csv">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </button>
+                    <button id="export-pdf" class="export-btn pdf">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button id="export-excel" class="export-btn excel">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                    <button id="export-print" class="export-btn print">
+                        <i class="fas fa-print"></i> Cetak Laporan
+                    </button>
                 </div>
             </div>
             
@@ -408,23 +675,81 @@
             </button>
         </section>
     </div>
+
+    <!-- Modal Export CSV -->
+    <div id="export-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-csv"></i> Export Data Ke CSV</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Pilih opsi export untuk data kehadiran:</p>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="export-filename"><i class="fas fa-file-signature"></i> Nama File</label>
+                    <input type="text" id="export-filename" value="rekap-kehadiran" placeholder="Nama file tanpa ekstensi">
+                </div>
+                
+                <div class="form-group">
+                    <label for="export-date-range"><i class="fas fa-calendar-alt"></i> Rentang Tanggal</label>
+                    <select id="export-date-range">
+                        <option value="all">Semua Data</option>
+                        <option value="week">Minggu Ini</option>
+                        <option value="month">Bulan Ini</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                
+                <div id="custom-date-range" style="display: none;">
+                    <div class="form-group">
+                        <label for="export-start-date">Dari Tanggal</label>
+                        <input type="date" id="export-start-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="export-end-date">Sampai Tanggal</label>
+                        <input type="date" id="export-end-date">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="include-summary" checked>
+                        <span>Termasuk ringkasan perhitungan gaji</span>
+                    </label>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="confirm-export-csv" class="btn-add">
+                        <i class="fas fa-download"></i> Download CSV
+                    </button>
+                    <button id="cancel-export" class="btn-reset">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <footer>
         <p>Dibuat dengan <i class="fas fa-heart" style="color:#e74c3c;"></i> untuk pencatatan jam kerja | © 2025 Sistem Pencatatan Kehadiran</p>
     </footer>
 
     <script>
-        // Inisialisasi data awal (sesuai contoh pada gambar)
+        // Inisialisasi data awal
         const initialData = [
-            { date: "11/12/2025", hours: "08.00–17.00", overtime: "-", totalHours: 8, note: "Ttd kontrak" },
-            { date: "12/12/2025", hours: "07.00–16.00", overtime: "-", totalHours: 8, note: "Induction" },
-            { date: "13/12/2025", hours: "07.00–16.00", overtime: "-", totalHours: 8, note: "Induction" },
-            { date: "15/12/2025", hours: "19.00–06.00", overtime: "3,5", totalHours: 11.5, note: "Kerja lembur" },
-            { date: "16/12/2025", hours: "18.00–08.00", overtime: "2,5", totalHours: 11.5, note: "" }
+            { date: "11/12/2025", hours: "08.00–17.00", overtime: 0, totalHours: 8, note: "Ttd kontrak" },
+            { date: "12/12/2025", hours: "07.00–16.00", overtime: 0, totalHours: 8, note: "Induction" },
+            { date: "13/12/2025", hours: "07.00–16.00", overtime: 0, totalHours: 8, note: "Induction" },
+            { date: "15/12/2025", hours: "19.00–06.00", overtime: 3.5, totalHours: 11.5, note: "Kerja lembur" },
+            { date: "16/12/2025", hours: "18.00–08.00", overtime: 2.5, totalHours: 11.5, note: "" }
         ];
 
         // Load data dari localStorage atau gunakan data awal
         let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || initialData;
+        
+        // Default gaji bulanan (5.500.000)
+        let monthlySalary = parseInt(localStorage.getItem('monthlySalary')) || 5500000;
 
         // Update tanggal dan waktu secara real-time
         function updateDateTime() {
@@ -442,14 +767,14 @@
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const year = date.getFullYear();
-            return ${day}/${month}/${year};
+            return `${day}/${month}/${year}`;
         }
 
         // Format jam kerja
         function formatTime(startTime, endTime) {
             const start = startTime.replace(':', '.');
             const end = endTime.replace(':', '.');
-            return ${start}–${end};
+            return `${start}–${end}`;
         }
 
         // Hitung total jam dari waktu mulai dan selesai
@@ -473,9 +798,28 @@
             return hours + (minutes / 60);
         }
 
+        // Format angka ke format Rupiah
+        function formatRupiah(amount) {
+            return 'Rp ' + amount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
         // Simpan data ke localStorage
         function saveData() {
             localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+        }
+
+        // Update tampilan gaji di halaman
+        function updateSalaryDisplay() {
+            // Update formula text
+            document.getElementById('formula-text').textContent = 
+                `${formatRupiah(monthlySalary)} : 173 x total jam kerja`;
+            
+            // Update display gaji bulanan
+            document.getElementById('display-monthly-salary').textContent = 
+                formatRupiah(monthlySalary);
+            
+            // Update perhitungan
+            updateTotals();
         }
 
         // Tampilkan data ke dalam tabel
@@ -496,8 +840,8 @@
                     <tr>
                         <td>${item.date}</td>
                         <td>${item.hours}</td>
-                        <td>${item.overtime}</td>
-                        <td>${item.totalHours}</td>
+                        <td>${item.overtime === 0 ? '-' : item.overtime.toFixed(1).replace('.', ',')}</td>
+                        <td>${item.totalHours.toFixed(1)}</td>
                         <td>${item.note}</td>
                         <td><button class="delete-btn" data-index="${index}"><i class="fas fa-trash"></i> Hapus</button></td>
                     </tr>
@@ -510,7 +854,6 @@
                         attendanceData.splice(index, 1);
                         saveData();
                         renderTable();
-                        updateTotals();
                     });
                 });
             }
@@ -524,27 +867,128 @@
             let totalOvertime = 0;
             
             attendanceData.forEach(item => {
-                totalHours += item.totalHours;
-                if (item.overtime !== '-' && item.overtime !== '') {
-                    // Konversi format 3,5 menjadi 3.5
-                    const overtimeValue = parseFloat(item.overtime.replace(',', '.'));
-                    if (!isNaN(overtimeValue)) {
-                        totalOvertime += overtimeValue;
-                    }
+                totalHours += parseFloat(item.totalHours);
+                if (item.overtime && item.overtime > 0) {
+                    totalOvertime += parseFloat(item.overtime);
                 }
             });
             
             // Tampilkan perhitungan gaji
-            document.getElementById('calc-total-hours').textContent = ${totalHours.toFixed(1)} jam;
-            document.getElementById('calc-total-overtime').textContent = ${totalOvertime.toFixed(1)} jam;
+            document.getElementById('calc-total-hours').textContent = `${totalHours.toFixed(1)} jam`;
+            document.getElementById('calc-total-overtime').textContent = `${totalOvertime.toFixed(1)} jam`;
             
-            // Hitung gaji per jam (5.500.000 / 173)
-            const hourlyRate = 5500000 / 173;
-            document.getElementById('hourly-rate').textContent = Rp ${hourlyRate.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")};
+            // Hitung gaji per jam (monthlySalary / 173)
+            const hourlyRate = monthlySalary / 173;
+            document.getElementById('hourly-rate').textContent = formatRupiah(hourlyRate);
             
             // Hitung perkiraan gaji
             const estimatedSalary = totalHours * hourlyRate;
-            document.getElementById('estimated-salary').textContent = Rp ${estimatedSalary.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")};
+            document.getElementById('estimated-salary').textContent = formatRupiah(estimatedSalary);
+        }
+
+        // Fungsi untuk export data ke CSV
+        function exportToCSV(filename = 'rekap-kehadiran', includeSummary = true) {
+            if (attendanceData.length === 0) {
+                alert('Tidak ada data untuk diexport!');
+                return;
+            }
+            
+            // Header CSV
+            let csvContent = "Tanggal,Jam Mulai-Selesai,Jam Lembur,Total Jam,Keterangan\n";
+            
+            // Data CSV
+            attendanceData.forEach(item => {
+                const overtime = item.overtime === 0 ? '-' : item.overtime.toFixed(1).replace('.', ',');
+                const note = item.note ? item.note.replace(/,/g, ';') : '';
+                
+                csvContent += `${item.date},${item.hours},${overtime},${item.totalHours.toFixed(1)},${note}\n`;
+            });
+            
+            // Tambah ringkasan jika diperlukan
+            if (includeSummary) {
+                let totalHours = 0;
+                let totalOvertime = 0;
+                
+                attendanceData.forEach(item => {
+                    totalHours += parseFloat(item.totalHours);
+                    if (item.overtime && item.overtime > 0) {
+                        totalOvertime += parseFloat(item.overtime);
+                    }
+                });
+                
+                const hourlyRate = monthlySalary / 173;
+                const estimatedSalary = totalHours * hourlyRate;
+                
+                csvContent += "\n\nRINGKASAN\n";
+                csvContent += `Gaji Bulanan,${formatRupiah(monthlySalary)}\n`;
+                csvContent += `Total Jam Kerja,${totalHours.toFixed(1)} jam\n`;
+                csvContent += `Total Jam Lembur,${totalOvertime.toFixed(1)} jam\n`;
+                csvContent += `Gaji per Jam,${formatRupiah(hourlyRate)}\n`;
+                csvContent += `Perkiraan Gaji,${formatRupiah(estimatedSalary)}\n`;
+                csvContent += `Tanggal Export,${new Date().toLocaleDateString('id-ID')}\n`;
+            }
+            
+            // Buat blob dan download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `${filename}-${new Date().getTime()}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`Data berhasil diexport ke file ${filename}.csv`);
+        }
+
+        // Fungsi untuk filter data berdasarkan tanggal
+        function filterDataByDateRange(rangeType, startDate = null, endDate = null) {
+            if (rangeType === 'all') {
+                return attendanceData;
+            }
+            
+            const now = new Date();
+            let filteredData = [];
+            
+            if (rangeType === 'week') {
+                // Data 7 hari terakhir
+                const oneWeekAgo = new Date(now);
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                
+                filteredData = attendanceData.filter(item => {
+                    const itemDate = parseDateString(item.date);
+                    return itemDate >= oneWeekAgo && itemDate <= now;
+                });
+            } else if (rangeType === 'month') {
+                // Data 30 hari terakhir
+                const oneMonthAgo = new Date(now);
+                oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+                
+                filteredData = attendanceData.filter(item => {
+                    const itemDate = parseDateString(item.date);
+                    return itemDate >= oneMonthAgo && itemDate <= now;
+                });
+            } else if (rangeType === 'custom' && startDate && endDate) {
+                // Data custom range
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                
+                filteredData = attendanceData.filter(item => {
+                    const itemDate = parseDateString(item.date);
+                    return itemDate >= start && itemDate <= end;
+                });
+            }
+            
+            return filteredData;
+        }
+
+        // Parse date string dari format DD/MM/YYYY
+        function parseDateString(dateStr) {
+            const [day, month, year] = dateStr.split('/').map(Number);
+            return new Date(year, month - 1, day);
         }
 
         // Tambah data baru
@@ -571,18 +1015,17 @@
             let totalHours = calculateHours(startTime, endTime);
             
             // Tambahkan jam lembur jika ada
+            let overtimeValue = 0;
             if (overtime && parseFloat(overtime) > 0) {
-                totalHours += parseFloat(overtime);
+                overtimeValue = parseFloat(overtime);
+                totalHours += overtimeValue;
             }
-            
-            // Format lembur (gunakan koma sebagai pemisah desimal)
-            const formattedOvertime = overtime && parseFloat(overtime) > 0 ? overtime.replace('.', ',') : '-';
             
             // Tambahkan data ke array
             attendanceData.push({
                 date: formattedDate,
                 hours: formattedHours,
-                overtime: formattedOvertime,
+                overtime: overtimeValue,
                 totalHours: totalHours,
                 note: note
             });
@@ -618,13 +1061,168 @@
             window.print();
         });
 
+        // Export CSV dengan modal
+        document.getElementById('export-csv-btn').addEventListener('click', function() {
+            document.getElementById('export-modal').style.display = 'block';
+        });
+
+        document.getElementById('export-csv').addEventListener('click', function() {
+            document.getElementById('export-modal').style.display = 'block';
+        });
+
+        // Export PDF (simulasi)
+        document.getElementById('export-pdf').addEventListener('click', function() {
+            alert('Fitur Export PDF akan segera hadir!');
+        });
+
+        // Export Excel (simulasi)
+        document.getElementById('export-excel').addEventListener('click', function() {
+            alert('Fitur Export Excel akan segera hadir!');
+        });
+
+        // Export Print (simulasi)
+        document.getElementById('export-print').addEventListener('click', function() {
+            window.print();
+        });
+
         // Reset semua data
         document.getElementById('reset-all-btn').addEventListener('click', function() {
             if (confirm('Apakah Anda yakin ingin menghapus semua data? Tindakan ini tidak dapat dibatalkan.')) {
                 attendanceData = [];
                 saveData();
                 renderTable();
-                alert('Semua data telah dihapus!');
+                alert('Semua data kehadiran telah dihapus!');
+            }
+        });
+
+        // Toggle form edit gaji
+        document.getElementById('edit-salary-btn').addEventListener('click', function() {
+            const salaryInputContainer = document.getElementById('salary-input-container');
+            const isVisible = salaryInputContainer.style.display === 'block';
+            
+            salaryInputContainer.style.display = isVisible ? 'none' : 'block';
+            
+            if (!isVisible) {
+                // Set nilai input saat form dibuka
+                document.getElementById('monthly-salary').value = monthlySalary;
+                document.getElementById('monthly-salary').focus();
+            }
+        });
+
+        // Simpan gaji baru
+        document.getElementById('save-salary-btn').addEventListener('click', function() {
+            const salaryInput = document.getElementById('monthly-salary');
+            const newSalary = parseInt(salaryInput.value);
+            
+            if (!newSalary || newSalary < 100000) {
+                alert('Harap masukkan gaji yang valid (minimal Rp 100.000)');
+                salaryInput.focus();
+                return;
+            }
+            
+            // Simpan gaji baru
+            monthlySalary = newSalary;
+            localStorage.setItem('monthlySalary', monthlySalary);
+            
+            // Update tampilan
+            updateSalaryDisplay();
+            
+            // Sembunyikan form input
+            document.getElementById('salary-input-container').style.display = 'none';
+            
+            // Tampilkan pesan sukses
+            alert(`Gaji berhasil diubah menjadi ${formatRupiah(monthlySalary)}`);
+        });
+
+        // Tombol preset gaji
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const salary = parseInt(this.getAttribute('data-salary'));
+                monthlySalary = salary;
+                localStorage.setItem('monthlySalary', monthlySalary);
+                
+                // Update tampilan
+                updateSalaryDisplay();
+                
+                // Sembunyikan form input
+                document.getElementById('salary-input-container').style.display = 'none';
+                
+                // Tampilkan pesan
+                alert(`Gaji berhasil diubah menjadi ${formatRupiah(monthlySalary)}`);
+            });
+        });
+
+        // Modal functionality
+        const exportModal = document.getElementById('export-modal');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const cancelExportBtn = document.getElementById('cancel-export');
+        const confirmExportBtn = document.getElementById('confirm-export-csv');
+        const exportDateRange = document.getElementById('export-date-range');
+        const customDateRange = document.getElementById('custom-date-range');
+
+        // Tampilkan/sembunyikan custom date range
+        exportDateRange.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'block';
+                
+                // Set default tanggal
+                const today = new Date().toISOString().split('T')[0];
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                const oneWeekAgoStr = oneWeekAgo.toISOString().split('T')[0];
+                
+                document.getElementById('export-start-date').value = oneWeekAgoStr;
+                document.getElementById('export-end-date').value = today;
+            } else {
+                customDateRange.style.display = 'none';
+            }
+        });
+
+        // Tutup modal
+        closeModalBtn.addEventListener('click', function() {
+            exportModal.style.display = 'none';
+        });
+
+        cancelExportBtn.addEventListener('click', function() {
+            exportModal.style.display = 'none';
+        });
+
+        // Export konfirmasi
+        confirmExportBtn.addEventListener('click', function() {
+            const filename = document.getElementById('export-filename').value || 'rekap-kehadiran';
+            const dateRange = exportDateRange.value;
+            const includeSummary = document.getElementById('include-summary').checked;
+            
+            let startDate = null;
+            let endDate = null;
+            
+            if (dateRange === 'custom') {
+                startDate = document.getElementById('export-start-date').value;
+                endDate = document.getElementById('export-end-date').value;
+                
+                if (!startDate || !endDate) {
+                    alert('Harap pilih tanggal mulai dan tanggal akhir untuk export custom!');
+                    return;
+                }
+            }
+            
+            // Filter data berdasarkan rentang tanggal
+            const filteredData = filterDataByDateRange(dateRange, startDate, endDate);
+            
+            if (filteredData.length === 0) {
+                alert('Tidak ada data dalam rentang tanggal yang dipilih!');
+                return;
+            }
+            
+            // Export data yang sudah difilter
+            exportToCSV(filename, includeSummary);
+            exportModal.style.display = 'none';
+        });
+
+        // Tutup modal jika klik di luar modal
+        window.addEventListener('click', function(event) {
+            if (event.target === exportModal) {
+                exportModal.style.display = 'none';
             }
         });
 
@@ -641,6 +1239,9 @@
             // Update waktu real-time
             updateDateTime();
             setInterval(updateDateTime, 60000); // Update setiap menit
+            
+            // Tampilkan gaji yang tersimpan
+            updateSalaryDisplay();
             
             // Render tabel dengan data awal
             renderTable();
