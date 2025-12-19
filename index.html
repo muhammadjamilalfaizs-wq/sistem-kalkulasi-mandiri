@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Kehadiran Kerja</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            transform: translate(40%, -40%);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h1 i {
+            font-size: 32px;
+            color: #3498db;
+        }
+
+        .date-time {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 16px;
+            margin-top: 10px;
+            color: #ecf0f1;
+        }
+
+        .date-time i {
+            color: #3498db;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-section, .result-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-size: 22px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #3498db;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .time-inputs {
+            display: flex;
+            gap: 15px;
+        }
+
+        .time-inputs > div {
+            flex: 1;
+        }
+
+        .formula {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3498db;
+        }
+
+        .formula h3 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .formula p {
+            color: #7f8c8d;
+            font-size: 15px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-add {
+            background-color: #2ecc71;
+            color: white;
+            flex: 2;
+        }
+
+        .btn-add:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background-color: #e74c3c;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-reset:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-print {
+            background-color: #3498db;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-print:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .total-row {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .total-row td {
+            border-top: 2px solid #3498db;
+        }
+
+        .calculation-result {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .calculation-result h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .result-item:last-child {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c3e50;
+            border-bottom: none;
+            padding-top: 10px;
+            margin-top: 10px;
+            border-top: 2px solid #3498db;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .highlight {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-clock"></i> Sistem Pencatatan Jam Kerja</h1>
+        <p>Catat dan hitung jam kerja serta lembur dengan mudah</p>
+        <div class="date-time">
+            <div><i class="far fa-calendar"></i> <span id="current-date">19 Desember 2025</span></div>
+            <div><i class="far fa-clock"></i> <span id="current-time">05:31</span></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="form-section">
+            <h2 class="section-title"><i class="fas fa-edit"></i> Input Data Kehadiran</h2>
+            
+            <div class="formula">
+                <h3>Rumus Perhitungan</h3>
+                <p>5.500.000 : 173 x total jam kerja</p>
+            </div>
+            
+            <form id="attendance-form">
+                <div class="form-group">
+                    <label for="date"><i class="far fa-calendar-alt"></i> Tanggal</label>
+                    <input type="date" id="date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="start-time"><i class="far fa-clock"></i> Jam Mulai</label>
+                    <input type="time" id="start-time" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="end-time"><i class="far fa-clock"></i> Jam Selesai</label>
+                    <input type="time" id="end-time" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="overtime"><i class="fas fa-business-time"></i> Jam Lembur (jika ada)</label>
+                    <input type="number" id="overtime" min="0" step="0.5" placeholder="Contoh: 3.5">
+                </div>
+                
+                <div class="form-group">
+                    <label for="note"><i class="far fa-sticky-note"></i> Keterangan</label>
+                    <textarea id="note" rows="3" placeholder="Contoh: Ttd kontrak, Induction, Kerja lembur, dll."></textarea>
+                </div>
+                
+                <div class="buttons">
+                    <button type="submit" class="btn-add"><i class="fas fa-plus-circle"></i> Tambah Data</button>
+                    <button type="button" id="reset-form" class="btn-reset"><i class="fas fa-redo"></i> Reset Form</button>
+                    <button type="button" id="print-btn" class="btn-print"><i class="fas fa-print"></i> Cetak</button>
+                </div>
+            </form>
+        </section>
+        
+        <section class="result-section">
+            <h2 class="section-title"><i class="fas fa-list-alt"></i> Rekap Kehadiran</h2>
+            
+            <div id="attendance-table-container">
+                <table id="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Jam</th>
+                            <th>Lembur</th>
+                            <th>Total Jam</th>
+                            <th>Keterangan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-data">
+                        <!-- Data akan ditampilkan di sini -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="3">TOTAL</td>
+                            <td id="total-hours">0</td>
+                            <td colspan="2" id="total-overtime">Lembur: 0 jam</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                
+                <div id="empty-message" class="empty-message">
+                    <i class="far fa-clipboard fa-3x" style="margin-bottom: 15px;"></i>
+                    <p>Belum ada data kehadiran. Silakan tambah data menggunakan form di sebelah kiri.</p>
+                </div>
+            </div>
+            
+            <div class="calculation-result">
+                <h3><i class="fas fa-calculator"></i> Perhitungan Gaji</h3>
+                <div class="result-item">
+                    <span>Total jam kerja:</span>
+                    <span id="calc-total-hours">0 jam</span>
+                </div>
+                <div class="result-item">
+                    <span>Total jam lembur:</span>
+                    <span id="calc-total-overtime">0 jam</span>
+                </div>
+                <div class="result-item">
+                    <span>Gaji per jam (5.500.000 / 173):</span>
+                    <span id="hourly-rate">Rp 31.792</span>
+                </div>
+                <div class="result-item">
+                    <span>Perkiraan gaji:</span>
+                    <span id="estimated-salary">Rp 0</span>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <p>Dibuat dengan <i class="fas fa-heart" style="color:#e74c3c;"></i> untuk pencatatan jam kerja | © 2025 Sistem Pencatatan Kehadiran</p>
+    </footer>
+
+    <script>
+        // Inisialisasi data awal (sesuai contoh pada gambar)
+        const initialData = [
+            { date: "11/12/2025", hours: "08.00–17.00", overtime: "-", totalHours: 8, note: "Ttd kontrak" },
+            { date: "12/12/2025", hours: "07.00–16.00", overtime: "-", totalHours: 8, note: "Induction" },
+            { date: "13/12/2025", hours: "07.00–16.00", overtime: "-", totalHours: 8, note: "Induction" },
+            { date: "15/12/2025", hours: "19.00–06.00", overtime: "3,5", totalHours: 11.5, note: "Kerja lembur" },
+            { date: "16/12/2025", hours: "18.00–08.00", overtime: "2,5", totalHours: 11.5, note: "" }
+        ];
+
+        // Load data dari localStorage atau gunakan data awal
+        let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || initialData;
+
+        // Update tanggal dan waktu secara real-time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', options);
+            
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('id-ID', timeOptions);
+        }
+
+        // Format tanggal ke format DD/MM/YYYY
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return ${day}/${month}/${year};
+        }
+
+        // Format jam kerja
+        function formatTime(startTime, endTime) {
+            const start = startTime.replace(':', '.');
+            const end = endTime.replace(':', '.');
+            return ${start}–${end};
+        }
+
+        // Hitung total jam dari waktu mulai dan selesai
+        function calculateHours(startTime, endTime) {
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const [endHour, endMinute] = endTime.split(':').map(Number);
+            
+            let startTotalMinutes = startHour * 60 + startMinute;
+            let endTotalMinutes = endHour * 60 + endMinute;
+            
+            // Jika waktu selesai lebih kecil dari waktu mulai (melewati tengah malam)
+            if (endTotalMinutes < startTotalMinutes) {
+                endTotalMinutes += 24 * 60; // Tambah 24 jam
+            }
+            
+            const totalMinutes = endTotalMinutes - startTotalMinutes;
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            
+            // Konversi ke desimal (0.5 untuk 30 menit)
+            return hours + (minutes / 60);
+        }
+
+        // Simpan data ke localStorage
+        function saveData() {
+            localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+        }
+
+        // Tampilkan data ke dalam tabel
+        function renderTable() {
+            const tbody = document.getElementById('attendance-data');
+            const emptyMessage = document.getElementById('empty-message');
+            const table = document.getElementById('attendance-table');
+            const tableFooter = document.querySelector('tfoot');
+            
+            if (attendanceData.length === 0) {
+                tbody.innerHTML = '';
+                emptyMessage.style.display = 'block';
+                table.style.display = 'none';
+                tableFooter.style.display = 'none';
+            } else {
+                emptyMessage.style.display = 'none';
+                table.style.display = 'table';
+                tableFooter.style.display = 'table-footer-group';
+                
+                tbody.innerHTML = attendanceData.map((item, index) => `
+                    <tr>
+                        <td>${item.date}</td>
+                        <td>${item.hours}</td>
+                        <td>${item.overtime}</td>
+                        <td>${item.totalHours}</td>
+                        <td>${item.note}</td>
+                        <td><button class="delete-btn" data-index="${index}"><i class="fas fa-trash"></i> Hapus</button></td>
+                    </tr>
+                `).join('');
+                
+                // Tambahkan event listener untuk tombol hapus
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        attendanceData.splice(index, 1);
+                        saveData();
+                        renderTable();
+                        updateTotals();
+                    });
+                });
+            }
+            
+            updateTotals();
+        }
+
+        // Hitung dan perbarui total jam kerja
+        function updateTotals() {
+            let totalHours = 0;
+            let totalOvertime = 0;
+            
+            attendanceData.forEach(item => {
+                totalHours += item.totalHours;
+                if (item.overtime !== '-' && item.overtime !== '') {
+                    // Konversi format 3,5 menjadi 3.5
+                    const overtimeValue = parseFloat(item.overtime.replace(',', '.'));
+                    if (!isNaN(overtimeValue)) {
+                        totalOvertime += overtimeValue;
+                    }
+                }
+            });
+            
+            // Tampilkan total di tabel
+            document.getElementById('total-hours').textContent = totalHours.toFixed(1);
+            document.getElementById('total-overtime').textContent = Lembur: ${totalOvertime.toFixed(1)} jam;
+            
+            // Tampilkan perhitungan gaji
+            document.getElementById('calc-total-hours').textContent = ${totalHours.toFixed(1)} jam;
+            document.getElementById('calc-total-overtime').textContent = ${totalOvertime.toFixed(1)} jam;
+            
+            // Hitung gaji per jam (5.500.000 / 173)
+            const hourlyRate = 5500000 / 173;
+            document.getElementById('hourly-rate').textContent = Rp ${hourlyRate.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")};
+            
+            // Hitung perkiraan gaji
+            const estimatedSalary = totalHours * hourlyRate;
+            document.getElementById('estimated-salary').textContent = Rp ${estimatedSalary.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")};
+        }
+
+        // Tambah data baru
+        document.getElementById('attendance-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const date = document.getElementById('date').value;
+            const startTime = document.getElementById('start-time').value;
+            const endTime = document.getElementById('end-time').value;
+            const overtime = document.getElementById('overtime').value;
+            const note = document.getElementById('note').value;
+            
+            // Validasi
+            if (!date || !startTime || !endTime) {
+                alert('Harap isi tanggal, jam mulai, dan jam selesai!');
+                return;
+            }
+            
+            // Format data
+            const formattedDate = formatDate(date);
+            const formattedHours = formatTime(startTime, endTime);
+            
+            // Hitung total jam kerja
+            let totalHours = calculateHours(startTime, endTime);
+            
+            // Tambahkan jam lembur jika ada
+            if (overtime && parseFloat(overtime) > 0) {
+                totalHours += parseFloat(overtime);
+            }
+            
+            // Format lembur (gunakan koma sebagai pemisah desimal)
+            const formattedOvertime = overtime && parseFloat(overtime) > 0 ? overtime.replace('.', ',') : '-';
+            
+            // Tambahkan data ke array
+            attendanceData.push({
+                date: formattedDate,
+                hours: formattedHours,
+                overtime: formattedOvertime,
+                totalHours: totalHours,
+                note: note
+            });
+            
+            // Simpan dan render ulang
+            saveData();
+            renderTable();
+            
+            // Reset form
+            this.reset();
+            
+            // Tampilkan pesan sukses
+            alert('Data kehadiran berhasil ditambahkan!');
+        });
+
+        // Reset form
+        document.getElementById('reset-form').addEventListener('click', function() {
+            document.getElementById('attendance-form').reset();
+        });
+
+        // Fungsi cetak
+        document.getElementById('print-btn').addEventListener('click', function() {
+            window.print();
+        });
+
+        // Reset semua data
+        function resetAllData() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua data? Tindakan ini tidak dapat dibatalkan.')) {
+                attendanceData = [];
+                saveData();
+                renderTable();
+            }
+        }
+
+        // Tambahkan tombol reset semua data
+        const resetAllBtn = document.createElement('button');
+        resetAllBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Hapus Semua Data';
+        resetAllBtn.className = 'btn-reset';
+        resetAllBtn.style.marginTop = '15px';
+        resetAllBtn.style.width = '100%';
+        resetAllBtn.addEventListener('click', resetAllData);
+        document.querySelector('.result-section').appendChild(resetAllBtn);
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set tanggal default ke hari ini
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            
+            // Set waktu default (08.00 - 17.00)
+            document.getElementById('start-time').value = '08:00';
+            document.getElementById('end-time').value = '17:00';
+            
+            // Update waktu real-time
+            updateDateTime();
+            setInterval(updateDateTime, 60000); // Update setiap menit
+            
+            // Render tabel dengan data awal
+            renderTable();
+        });
+    </script>
+</body>
+</html>
