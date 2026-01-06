@@ -741,6 +741,43 @@
             color: var(--secondary);
         }
 
+        /* ===== CALCULATION DETAILS ===== */
+        .calculation-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .detail-item.total {
+            border-top: 2px solid var(--primary);
+            margin-top: 8px;
+            padding-top: 12px;
+            font-weight: 600;
+        }
+
+        .detail-label {
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--gray-800);
+            font-weight: 600;
+        }
+
+        .separator {
+            height: 1px;
+            background: var(--gray-300);
+            margin: 16px 0;
+        }
+
         /* ===== UTILITIES ===== */
         .empty-state {
             text-align: center;
@@ -773,6 +810,12 @@
             border-radius: 50%;
             background: var(--accent);
         }
+
+        .mt-1 { margin-top: 4px; }
+        .mt-4 { margin-top: 16px; }
+        .ml-1 { margin-left: 4px; }
+        .mr-1 { margin-right: 4px; }
+        .mr-2 { margin-right: 8px; }
 
         /* ===== ANIMATIONS ===== */
         @keyframes fadeIn {
@@ -950,6 +993,19 @@
                     </div>
                     
                     <div class="form-group">
+                        <label class="form-label" for="day-type">
+                            <i class="fas fa-calendar-day"></i>
+                            Tipe Hari Kerja
+                        </label>
+                        <select id="day-type" class="form-control">
+                            <option value="kerja">Hari Kerja (Senin-Jumat)</option>
+                            <option value="libur5">Hari Libur (5 Hari Kerja)</option>
+                            <option value="libur6">Hari Libur (6 Hari Kerja) - Sabtu</option>
+                        </select>
+                        <div class="text-xs text-muted mt-2">Pilih sesuai jenis hari untuk perhitungan lembur yang tepat</div>
+                    </div>
+                    
+                    <div class="form-group">
                         <label class="form-label" for="overtime">
                             <i class="fas fa-clock"></i>
                             Jam Lembur (Opsional)
@@ -1020,7 +1076,7 @@
                         <i class="fas fa-trash-alt mr-2"></i>Hapus Semua
                     </button>
                     <button id="export-data" class="btn btn-outline">
-                        <i class="fas fa-download mr-2"></i>Export
+                        <i class="fas fa-download mr-2"></i>Export Data
                     </button>
                     <button id="backup-data" class="btn btn-outline">
                         <i class="fas fa-file-export mr-2"></i>Backup
@@ -1162,26 +1218,138 @@
 
     <!-- JavaScript -->
     <script>
-        // ==================== DATA MANAGEMENT ====================
+        // ==================== GLOBAL VARIABLES ====================
         let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || [
-            { date: "11/12/2025", hours: "08.00–17.00", breakTime: 1, overtime: 0, totalHours: 8, note: "Ttd kontrak" },
-            { date: "12/12/2025", hours: "07.00–16.00", breakTime: 1, overtime: 0, totalHours: 8, note: "Induction" },
-            { date: "13/12/2025", hours: "07.00–16.00", breakTime: 1, overtime: 0, totalHours: 8, note: "Induction" },
-            { date: "15/12/2025", hours: "19.00–06.00", breakTime: 1, overtime: 3.5, totalHours: 11.5, note: "Kerja lembur" },
-            { date: "16/12/2025", hours: "18.00–08.00", breakTime: 1, overtime: 2.5, totalHours: 10, note: "" }
+            { date: "11/12/2025", hours: "08.00–17.00", breakTime: 1, overtime: 0, totalHours: 8, note: "Ttd kontrak", dayType: "kerja" },
+            { date: "12/12/2025", hours: "07.00–16.00", breakTime: 1, overtime: 0, totalHours: 8, note: "Induction", dayType: "kerja" },
+            { date: "13/12/2025", hours: "07.00–16.00", breakTime: 1, overtime: 0, totalHours: 8, note: "Induction", dayType: "kerja" },
+            { date: "15/12/2025", hours: "19.00–06.00", breakTime: 1, overtime: 3.5, totalHours: 11.5, note: "Kerja lembur", dayType: "kerja" },
+            { date: "16/12/2025", hours: "18.00–08.00", breakTime: 1, overtime: 2.5, totalHours: 10, note: "", dayType: "libur5" }
         ];
-        
+
         let monthlySalary = parseInt(localStorage.getItem('monthlySalary')) || 5500000;
         let endNormalTime = localStorage.getItem('endNormalTime') || '04:00';
         let isEditMode = false;
         let currentEditIndex = -1;
+
+        // ==================== FUNGSI PERHITUNGAN JAM KERJA ====================
+        function hitungJamKerjaReal(jamMasuk, jamPulang) {
+            const [jm, mm] = jamMasuk.split(":").map(Number);
+            const [jp, mp] = jamPulang.split(":").map(Number);
+            
+            const menitMasuk = jm * 60 + mm;
+            const menitPulang = jp * 60 + mp;
+            
+            let selisihMenit = menitPulang - menitMasuk;
+            
+            if (selisihMenit < 0) {
+                selisihMenit += 24 * 60;
+            }
+            
+            return selisihMenit / 60;
+        }
+
+        function pisahkanJam(totalJam) {
+            const jamNormal = Math.min(totalJam, 8);
+            const jamLembur = Math.max(totalJam - 8, 0);
+            return { jamNormal, jamLembur };
+        }
+
+        // ===== HARI KERJA =====
+        function konversiLemburHariKerja(jamLembur) {
+            if (jamLembur <= 0) return 0;
+            if (jamLembur === 1) return 1.5;
+            if (jamLembur === 2) return 3.5;
+            if (jamLembur >= 3) {
+                return 5.5 + (jamLembur - 3) * 2;
+            }
+            return 0;
+        }
+
+        // ===== HARI LIBUR 5 HARI =====
+        function konversiLemburHariLibur5(jam) {
+            if (jam <= 0) return 0;
+            
+            let nilai = 0;
+            
+            for (let i = 1; i <= jam; i++) {
+                if (i <= 7) {
+                    nilai += 2;
+                } else if (i === 8) {
+                    nilai += 3;
+                } else {
+                    nilai += 4;
+                }
+            }
+            
+            return nilai;
+        }
+
+        // ===== HARI LIBUR 6 HARI (SABTU) =====
+        function konversiLemburHariLibur6(jam) {
+            if (jam <= 0) return 0;
+            
+            let nilai = 0;
+            
+            for (let i = 1; i <= jam; i++) {
+                if (i <= 5) {
+                    nilai += 2;
+                } else if (i <= 7) {
+                    nilai += 3;
+                } else {
+                    nilai += 4;
+                }
+            }
+            
+            return nilai;
+        }
+
+        // ===== FUNGSI UTAMA PERHITUNGAN =====
+        function hitungKerja({ jamMasuk, jamPulang, tipeHari, istirahat = 1 }) {
+            // Hitung total jam kerja real (termasuk istirahat)
+            let totalJamKerjaReal = hitungJamKerjaReal(jamMasuk, jamPulang);
+            
+            // Kurangi waktu istirahat
+            totalJamKerjaReal = Math.max(totalJamKerjaReal - istirahat, 0);
+            
+            let jamNormal = 0;
+            let jamLemburReal = 0;
+            let nilaiLembur = 0;
+            
+            if (tipeHari === "kerja") {
+                const pisah = pisahkanJam(totalJamKerjaReal);
+                jamNormal = pisah.jamNormal;
+                jamLemburReal = Math.floor(pisah.jamLembur);
+                nilaiLembur = konversiLemburHariKerja(jamLemburReal);
+            } 
+            else if (tipeHari === "libur5") {
+                jamNormal = 0;
+                jamLemburReal = Math.floor(totalJamKerjaReal);
+                nilaiLembur = konversiLemburHariLibur5(jamLemburReal);
+            }
+            else if (tipeHari === "libur6") {
+                const pisah = pisahkanJam(totalJamKerjaReal);
+                jamNormal = pisah.jamNormal; // Sabtu masih ada jam normal 5 jam
+                jamLemburReal = Math.floor(pisah.jamLembur);
+                nilaiLembur = konversiLemburHariLibur6(jamLemburReal);
+            }
+            
+            const totalDibayarDalamJam = jamNormal + nilaiLembur;
+            
+            return {
+                totalJamKerjaReal,
+                jamNormal,
+                jamLemburReal,
+                nilaiLembur,
+                totalDibayarDalamJam
+            };
+        }
 
         // ==================== UTILITY FUNCTIONS ====================
         function formatRupiah(amount) {
             return 'Rp ' + amount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
         
-        // Fungsi untuk mendapatkan hari dari tanggal Indonesia
         function getDayName(dateString) {
             const [day, month, year] = dateString.split('/').map(Number);
             const date = new Date(year, month - 1, day);
@@ -1189,12 +1357,11 @@
             return days[date.getDay()];
         }
         
-        // Fungsi untuk menentukan apakah hari weekend
         function isWeekend(dateString) {
             const [day, month, year] = dateString.split('/').map(Number);
             const date = new Date(year, month - 1, day);
             const dayOfWeek = date.getDay();
-            return dayOfWeek === 0 || dayOfWeek === 6; // 0 = Minggu, 6 = Sabtu
+            return dayOfWeek === 0 || dayOfWeek === 6;
         }
         
         function formatDate(dateString) {
@@ -1223,32 +1390,6 @@
             return { startTime, endTime };
         }
         
-        function calculateHours(startTime, endTime, breakTime = 1) {
-            const [startHour, startMinute] = startTime.split(':').map(Number);
-            const [endHour, endMinute] = endTime.split(':').map(Number);
-            
-            let startTotalMinutes = startHour * 60 + startMinute;
-            let endTotalMinutes = endHour * 60 + endMinute;
-            
-            if (endTotalMinutes < startTotalMinutes) {
-                endTotalMinutes += 24 * 60;
-            }
-            
-            const totalMinutes = endTotalMinutes - startTotalMinutes;
-            let totalHours = totalMinutes / 60;
-            totalHours -= breakTime;
-            
-            const [normalHour, normalMinute] = endNormalTime.split(':').map(Number);
-            const endNormalMinutes = normalHour * 60 + normalMinute + 24 * 60;
-            
-            if (endTotalMinutes > endNormalMinutes) {
-                const minutesAfterNormal = endTotalMinutes - endNormalMinutes;
-                totalHours = (totalMinutes - minutesAfterNormal) / 60 - breakTime;
-            }
-            
-            return totalHours < 0 ? 0 : parseFloat(totalHours.toFixed(1));
-        }
-        
         function saveData() {
             localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
             localStorage.setItem('monthlySalary', monthlySalary);
@@ -1268,7 +1409,7 @@
             
             toast.innerHTML = `
                 <i class="fas fa-${icon}"></i>
-                ${message}
+                <span>${message}</span>
             `;
             
             document.body.appendChild(toast);
@@ -1279,14 +1420,235 @@
             }, 3000);
         }
 
-        // ==================== PROFILE EDIT FEATURE ====================
+        // ==================== FUNGSI UNTUK HITUNG TOTAL ====================
+        function hitungTotalSummary() {
+            let totalHariKerja = attendanceData.length;
+            let totalJamKerja = 0;
+            let totalJamLembur = 0;
+            let totalJamNormal = 0;
+            let totalGaji = 0;
+            
+            const hourlyRate = monthlySalary / 173;
+            
+            attendanceData.forEach(item => {
+                const details = item.calculationDetails || {};
+                totalJamKerja += item.totalHours || 0;
+                totalJamLembur += details.nilaiLembur || 0;
+                totalJamNormal += details.jamNormal || 0;
+                totalGaji += (item.totalHours || 0) * hourlyRate;
+            });
+            
+            return {
+                totalHariKerja,
+                totalJamKerja: totalJamKerja.toFixed(1),
+                totalJamLembur: totalJamLembur.toFixed(1),
+                totalJamNormal: totalJamNormal.toFixed(1),
+                totalGaji: totalGaji.toFixed(0)
+            };
+        }
+
+        // ==================== FUNGSI EXPORT DENGAN SUMMARY ====================
+        function exportDataWithSummary() {
+            if (attendanceData.length === 0) {
+                showToast('Tidak ada data untuk diexport', 'error');
+                return;
+            }
+            
+            // Hitung total summary
+            const summary = hitungTotalSummary();
+            const hourlyRate = monthlySalary / 173;
+            const now = new Date();
+            const exportDate = now.toLocaleDateString('id-ID');
+            const exportTime = now.toLocaleTimeString('id-ID');
+            
+            let csvContent = "";
+            
+            // HEADER SUMMARY
+            csvContent += "WORK SYNC - EXPORT DATA KEHADIRAN\n";
+            csvContent += "========================================\n";
+            csvContent += `Tanggal Export: ${exportDate} ${exportTime}\n`;
+            csvContent += `Nama: ${document.getElementById('user-name').textContent}\n`;
+            csvContent += `Posisi: ${document.getElementById('user-position').textContent}\n`;
+            csvContent += `Gaji Bulanan: ${formatRupiah(monthlySalary)}\n`;
+            csvContent += `Upah per Jam: ${formatRupiah(hourlyRate)}\n\n`;
+            
+            // SUMMARY DATA
+            csvContent += "RINGKASAN TOTAL\n";
+            csvContent += "----------------\n";
+            csvContent += `Total Hari Kerja: ${summary.totalHariKerja} hari\n`;
+            csvContent += `Total Jam Normal: ${summary.totalJamNormal} jam\n`;
+            csvContent += `Total Jam Lembur: ${summary.totalJamLembur} jam (setara)\n`;
+            csvContent += `Total Jam Kerja: ${summary.totalJamKerja} jam\n`;
+            csvContent += `Total Gaji: ${formatRupiah(parseFloat(summary.totalGaji))}\n\n`;
+            
+            // DETAIL DATA
+            csvContent += "DETAIL KEHADIRAN\n";
+            csvContent += "========================================\n";
+            csvContent += "No,Tanggal,Hari,Tipe Hari,Jam Masuk,Jam Pulang,Jam Kerja,Istirahat (jam),Jam Normal,Jam Lembur Real,Nilai Lembur (jam setara),Total Jam Dibayar,Catatan\n";
+            
+            attendanceData.forEach((item, index) => {
+                const dayName = getDayName(item.date);
+                const timeRange = parseTimeRange(item.hours);
+                const details = item.calculationDetails || {};
+                
+                const tipeHariText = item.dayType === 'kerja' ? 'Hari Kerja' : 
+                                   item.dayType === 'libur5' ? 'Libur (5H)' : 
+                                   'Libur (6H) - Sabtu';
+                
+                csvContent += `${index + 1},"${item.date}","${dayName}","${tipeHariText}","${timeRange.startTime}","${timeRange.endTime}",`;
+                csvContent += `${details.totalJamKerjaReal?.toFixed(1) || 0},${item.breakTime},`;
+                csvContent += `${details.jamNormal || 0},${details.jamLemburReal || 0},`;
+                csvContent += `${details.nilaiLembur?.toFixed(1) || 0},${item.totalHours?.toFixed(1) || 0},"${item.note || ''}"\n`;
+            });
+            
+            // FOOTER
+            csvContent += "\n\n";
+            csvContent += "CATATAN PERHITUNGAN LEMBUR:\n";
+            csvContent += "1. Hari Kerja: jam ke-1 = 1.5x, jam ke-2 = 2x, jam ke-3+ = 3x\n";
+            csvContent += "2. Hari Libur (5H): jam ke-1-7 = 2x, jam ke-8 = 3x, jam ke-9+ = 4x\n";
+            csvContent += "3. Hari Libur (6H - Sabtu): jam ke-1-5 = 2x, jam ke-6-7 = 3x, jam ke-8+ = 4x\n";
+            csvContent += "\n";
+            csvContent += "© 2025 WorkSync - Your Workforce, Perfectly Synchronized";
+            
+            // Buat blob dan download
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `worksync-report-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            // Tampilkan summary dalam alert
+            const summaryMessage = `
+📊 RINGKASAN EXPORT DATA:
+
+🗓️ Total Hari Kerja: ${summary.totalHariKerja} hari
+⏰ Total Jam Normal: ${summary.totalJamNormal} jam
+🔥 Total Jam Lembur: ${summary.totalJamLembur} jam (setara)
+⏱️ Total Jam Kerja: ${summary.totalJamKerja} jam
+💰 Total Gaji: ${formatRupiah(parseFloat(summary.totalGaji))}
+
+✅ Data berhasil diexport ke file CSV!
+            `;
+            
+            showToast('Data berhasil diexport dengan ringkasan lengkap!', 'success');
+            
+            // Tampilkan modal summary
+            showExportSummary(summary);
+        }
+
+        // ==================== MODAL SUMMARY EXPORT ====================
+        function showExportSummary(summary) {
+            const modalHTML = `
+                <div class="modal" id="export-summary-modal">
+                    <div class="modal-content" style="max-width: 600px;">
+                        <div class="modal-header">
+                            <h3 style="color: white; margin: 0;">
+                                <i class="fas fa-file-export mr-2"></i>
+                                Ringkasan Export Data
+                            </h3>
+                            <button class="close-modal" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">
+                                &times;
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div style="text-align: center; margin-bottom: 24px;">
+                                <div style="width: 80px; height: 80px; background: rgba(0, 200, 83, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                                    <i class="fas fa-check-circle" style="font-size: 32px; color: var(--accent);"></i>
+                                </div>
+                                <h3>Data Berhasil Diexport!</h3>
+                                <p class="text-muted">File CSV telah didownload dengan ringkasan lengkap</p>
+                            </div>
+                            
+                            <div class="summary-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+                                <div class="summary-item" style="background: var(--gray-50); padding: 16px; border-radius: var(--radius-md); text-align: center;">
+                                    <div class="summary-value" style="font-size: 24px; font-weight: 700; color: var(--primary);">
+                                        ${summary.totalHariKerja}
+                                    </div>
+                                    <div class="summary-label" style="font-size: 12px; color: var(--gray-600); margin-top: 4px;">
+                                        <i class="fas fa-calendar-alt mr-1"></i> Hari Kerja
+                                    </div>
+                                </div>
+                                <div class="summary-item" style="background: var(--gray-50); padding: 16px; border-radius: var(--radius-md); text-align: center;">
+                                    <div class="summary-value" style="font-size: 24px; font-weight: 700; color: var(--accent);">
+                                        ${summary.totalJamNormal}
+                                    </div>
+                                    <div class="summary-label" style="font-size: 12px; color: var(--gray-600); margin-top: 4px;">
+                                        <i class="fas fa-clock mr-1"></i> Jam Normal
+                                    </div>
+                                </div>
+                                <div class="summary-item" style="background: var(--gray-50); padding: 16px; border-radius: var(--radius-md); text-align: center;">
+                                    <div class="summary-value" style="font-size: 24px; font-weight: 700; color: var(--warning);">
+                                        ${summary.totalJamLembur}
+                                    </div>
+                                    <div class="summary-label" style="font-size: 12px; color: var(--gray-600); margin-top: 4px;">
+                                        <i class="fas fa-fire mr-1"></i> Jam Lembur
+                                    </div>
+                                </div>
+                                <div class="summary-item" style="background: var(--gray-50); padding: 16px; border-radius: var(--radius-md); text-align: center;">
+                                    <div class="summary-value" style="font-size: 24px; font-weight: 700; color: var(--secondary);">
+                                        ${summary.totalJamKerja}
+                                    </div>
+                                    <div class="summary-label" style="font-size: 12px; color: var(--gray-600); margin-top: 4px;">
+                                        <i class="fas fa-business-time mr-1"></i> Total Jam
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="total-salary" style="background: var(--gradient-primary); color: white; padding: 20px; border-radius: var(--radius-md); text-align: center;">
+                                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">
+                                    TOTAL ESTIMASI GAJI
+                                </div>
+                                <div style="font-size: 32px; font-weight: 700;">
+                                    ${formatRupiah(parseFloat(summary.totalGaji))}
+                                </div>
+                            </div>
+                            
+                            <div class="text-xs text-muted mt-4" style="text-align: center;">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                File CSV berisi detail lengkap dan ringkasan ini
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary close-export-summary">
+                                <i class="fas fa-check mr-2"></i>Mengerti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Tambahkan modal ke body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            const modal = document.getElementById('export-summary-modal');
+            modal.style.display = 'flex';
+            
+            // Event listeners untuk modal
+            modal.querySelector('.close-modal').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            modal.querySelector('.close-export-summary').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // Close modal on ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // ==================== PROFILE MANAGEMENT ====================
         function setupProfileEdit() {
             const userProfile = document.getElementById('user-profile');
             const userName = document.getElementById('user-name');
             const userPosition = document.getElementById('user-position');
             const userAvatar = document.getElementById('user-avatar');
             
-            // Load saved profile from localStorage
+            // Load saved profile
             const savedName = localStorage.getItem('hrUserName');
             const savedPosition = localStorage.getItem('hrUserPosition');
             
@@ -1322,7 +1684,7 @@
                 }
             });
             
-            // Function to update avatar initials
+            // Update avatar initials
             function updateAvatar(fullName) {
                 const initials = fullName
                     .split(' ')
@@ -1335,7 +1697,7 @@
             }
         }
 
-        // ==================== RENDER FUNCTIONS ====================
+        // ==================== TABLE MANAGEMENT ====================
         function renderTable() {
             const tbody = document.getElementById('attendance-data');
             const emptyState = document.getElementById('empty-state');
@@ -1356,6 +1718,28 @@
                     const isWeekendDay = isWeekend(item.date);
                     const hasNote = item.note && item.note.trim() !== '';
                     
+                    // Tentukan badge type berdasarkan tipe hari
+                    let dayTypeBadge = '';
+                    let dayTypeText = '';
+                    
+                    switch(item.dayType) {
+                        case 'kerja':
+                            dayTypeBadge = 'badge-info';
+                            dayTypeText = 'Kerja';
+                            break;
+                        case 'libur5':
+                            dayTypeBadge = 'badge-warning';
+                            dayTypeText = 'Libur 5H';
+                            break;
+                        case 'libur6':
+                            dayTypeBadge = 'badge-warning';
+                            dayTypeText = 'Sabtu';
+                            break;
+                        default:
+                            dayTypeBadge = 'badge-info';
+                            dayTypeText = 'Kerja';
+                    }
+                    
                     return `
                     <tr id="row-${index}">
                         <td>
@@ -1364,12 +1748,23 @@
                                 <i class="fas ${isWeekendDay ? 'fa-umbrella-beach' : 'fa-briefcase'} mr-1"></i>
                                 ${dayName}
                             </div>
+                            <div class="badge ${dayTypeBadge} mt-1" style="font-size: 10px;">
+                                ${dayTypeText}
+                            </div>
                         </td>
                         <td>${item.hours}</td>
                         <td>${item.breakTime === 0 ? '-' : item.breakTime + ' jam'}</td>
-                        <td>${item.overtime > 0 ? item.overtime.toFixed(1) + ' jam' : '-'}</td>
                         <td>
-                            <div class="badge ${item.totalHours >= 8 ? 'badge-success' : 'badge-warning'}">
+                            ${item.overtime > 0 ? 
+                                `<div class="badge badge-warning">
+                                    ${item.overtime.toFixed(1)} jam
+                                    <small class="ml-1">(${item.calculationDetails?.nilaiLembur || 0} setara)</small>
+                                </div>` : 
+                                '-'
+                            }
+                        </td>
+                        <td>
+                            <div class="badge ${item.totalHours >= 8 ? 'badge-success' : 'badge-info'}">
                                 ${item.totalHours.toFixed(1)} jam
                             </div>
                         </td>
@@ -1381,8 +1776,15 @@
                         </td>
                         <td>
                             <div class="status-indicator">
-                                <div class="status-dot" style="background: ${item.totalHours >= 8 ? 'var(--accent)' : 'var(--warning)'}"></div>
-                                <span class="text-xs">${item.totalHours >= 8 ? 'Complete' : 'Pending'}</span>
+                                <div class="status-dot" style="background: ${
+                                    item.dayType === 'libur5' || item.dayType === 'libur6' ? 'var(--warning)' :
+                                    item.totalHours >= 8 ? 'var(--accent)' : 'var(--info)'
+                                }"></div>
+                                <span class="text-xs">${
+                                    item.dayType === 'libur5' ? 'Libur' :
+                                    item.dayType === 'libur6' ? 'Sabtu' :
+                                    item.totalHours >= 8 ? 'Complete' : 'Pending'
+                                }</span>
                             </div>
                         </td>
                         <td>
@@ -1392,6 +1794,9 @@
                                 </button>
                                 <button class="btn btn-outline btn-sm delete-btn" data-index="${index}" title="Delete">
                                     <i class="fas fa-trash"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm info-btn" data-index="${index}" title="Detail Perhitungan">
+                                    <i class="fas fa-calculator"></i>
                                 </button>
                             </div>
                         </td>
@@ -1415,26 +1820,130 @@
                         deleteAttendance(index);
                     });
                 });
+                
+                document.querySelectorAll('.info-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const index = parseInt(this.getAttribute('data-index'));
+                        showCalculationDetails(index);
+                    });
+                });
             }
             
             updateCalculations();
             updateStats();
         }
-        
-        // Fungsi untuk toggle note (expand/collapse)
+
+        // Global function for note toggle
         window.toggleNote = function(index) {
             const noteCell = document.getElementById(`note-cell-${index}`);
             noteCell.classList.toggle('expanded');
         };
-        
+
+        // ==================== FUNGSI DETAIL PERHITUNGAN ====================
+        function showCalculationDetails(index) {
+            const data = attendanceData[index];
+            const details = data.calculationDetails || {};
+            
+            const modalHTML = `
+                <div class="modal" id="calculation-modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 style="color: white; margin: 0;">
+                                <i class="fas fa-calculator mr-2"></i>
+                                Detail Perhitungan
+                            </h3>
+                            <button class="close-modal" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">
+                                &times;
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="calculation-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Tanggal:</span>
+                                    <span class="detail-value">${data.date}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Jam Kerja:</span>
+                                    <span class="detail-value">${data.hours}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Tipe Hari:</span>
+                                    <span class="detail-value">${
+                                        data.dayType === 'kerja' ? 'Hari Kerja (Senin-Jumat)' :
+                                        data.dayType === 'libur5' ? 'Hari Libur (5 Hari Kerja)' :
+                                        'Hari Libur (6 Hari Kerja) - Sabtu'
+                                    }</span>
+                                </div>
+                                <div class="separator"></div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Total Jam Real:</span>
+                                    <span class="detail-value">${details.totalJamKerjaReal?.toFixed(1) || 0} jam</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Istirahat:</span>
+                                    <span class="detail-value">${data.breakTime} jam</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Jam Normal:</span>
+                                    <span class="detail-value">${details.jamNormal || 0} jam</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Jam Lembur Real:</span>
+                                    <span class="detail-value">${details.jamLemburReal || 0} jam</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Nilai Lembur:</span>
+                                    <span class="detail-value">${details.nilaiLembur?.toFixed(1) || 0} jam (setara)</span>
+                                </div>
+                                <div class="separator"></div>
+                                <div class="detail-item total">
+                                    <span class="detail-label">Total Dibayar:</span>
+                                    <span class="detail-value">${details.totalDibayarDalamJam?.toFixed(1) || 0} jam</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary close-modal-btn">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Tambahkan modal ke body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            const modal = document.getElementById('calculation-modal');
+            modal.style.display = 'flex';
+            
+            // Event listeners untuk modal
+            modal.querySelector('.close-modal').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            modal.querySelector('.close-modal-btn').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // Close modal on ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // ==================== CALCULATIONS ====================
         function updateCalculations() {
             let totalDays = attendanceData.length;
             let totalHours = 0;
             let overtimeHours = 0;
+            let normalHours = 0;
             
             attendanceData.forEach(item => {
                 totalHours += item.totalHours;
-                overtimeHours += item.overtime;
+                overtimeHours += (item.calculationDetails?.nilaiLembur || 0);
+                normalHours += (item.calculationDetails?.jamNormal || 0);
             });
             
             const hourlyRate = monthlySalary / 173;
@@ -1446,7 +1955,7 @@
             document.getElementById('calc-hourly-rate').textContent = formatRupiah(hourlyRate);
             document.getElementById('calc-total-salary').textContent = formatRupiah(estimatedSalary);
         }
-        
+
         function updateStats() {
             let totalHours = 0;
             let totalDays = attendanceData.length;
@@ -1476,6 +1985,7 @@
             const startTime = document.getElementById('start-time').value;
             const endTime = document.getElementById('end-time').value;
             const breakTime = parseFloat(document.getElementById('break-time').value);
+            const dayType = document.getElementById('day-type').value;
             const inputOvertime = parseFloat(document.getElementById('overtime').value) || 0;
             const note = document.getElementById('note').value;
             
@@ -1484,9 +1994,15 @@
                 return;
             }
             
-            const normalHours = calculateHours(startTime, endTime, breakTime);
-            const totalHours = normalHours + inputOvertime;
+            // Hitung menggunakan fungsi baru
+            const perhitungan = hitungKerja({
+                jamMasuk: startTime,
+                jamPulang: endTime,
+                tipeHari: dayType,
+                istirahat: breakTime
+            });
             
+            // Format data untuk disimpan
             const formattedDate = formatDate(date);
             const formattedHours = formatTime(startTime, endTime);
             
@@ -1494,9 +2010,12 @@
                 date: formattedDate,
                 hours: formattedHours,
                 breakTime: breakTime,
-                overtime: inputOvertime,
-                totalHours: totalHours,
-                note: note
+                overtime: perhitungan.jamLemburReal,
+                totalHours: perhitungan.totalDibayarDalamJam,
+                dayType: dayType,
+                note: note,
+                // Simpan detail perhitungan untuk tampilan
+                calculationDetails: perhitungan
             };
             
             attendanceData.push(attendance);
@@ -1504,7 +2023,14 @@
             renderTable();
             resetForm();
             
-            showToast('Data kehadiran berhasil ditambahkan', 'success');
+            // Tampilkan detail perhitungan dalam toast
+            showToast(
+                `Data berhasil disimpan!<br>
+                Jam Normal: ${perhitungan.jamNormal} jam<br>
+                Lembur: ${perhitungan.jamLemburReal} jam (${perhitungan.nilaiLembur} jam setara)<br>
+                Total: ${perhitungan.totalDibayarDalamJam.toFixed(1)} jam`,
+                'success'
+            );
         }
         
         function editAttendance(index) {
@@ -1516,6 +2042,7 @@
             document.getElementById('start-time').value = timeRange.startTime;
             document.getElementById('end-time').value = timeRange.endTime;
             document.getElementById('break-time').value = data.breakTime;
+            document.getElementById('day-type').value = data.dayType || 'kerja';
             document.getElementById('overtime').value = data.overtime || '';
             document.getElementById('note').value = data.note || '';
             document.getElementById('edit-index').value = index;
@@ -1530,11 +2057,17 @@
             const startTime = document.getElementById('start-time').value;
             const endTime = document.getElementById('end-time').value;
             const breakTime = parseFloat(document.getElementById('break-time').value);
+            const dayType = document.getElementById('day-type').value;
             const inputOvertime = parseFloat(document.getElementById('overtime').value) || 0;
             const note = document.getElementById('note').value;
             
-            const normalHours = calculateHours(startTime, endTime, breakTime);
-            const totalHours = normalHours + inputOvertime;
+            // Hitung menggunakan fungsi baru
+            const perhitungan = hitungKerja({
+                jamMasuk: startTime,
+                jamPulang: endTime,
+                tipeHari: dayType,
+                istirahat: breakTime
+            });
             
             const formattedDate = formatDate(date);
             const formattedHours = formatTime(startTime, endTime);
@@ -1543,16 +2076,18 @@
                 date: formattedDate,
                 hours: formattedHours,
                 breakTime: breakTime,
-                overtime: inputOvertime,
-                totalHours: totalHours,
-                note: note
+                overtime: perhitungan.jamLemburReal,
+                totalHours: perhitungan.totalDibayarDalamJam,
+                dayType: dayType,
+                note: note,
+                calculationDetails: perhitungan
             };
             
             saveData();
             renderTable();
             deactivateEditMode();
             
-            showToast('Data berhasil diupdate', 'success');
+            showToast('Data berhasil diupdate dengan perhitungan baru!', 'success');
         }
         
         function deleteAttendance(index) {
@@ -1572,6 +2107,7 @@
             showToast('Semua data berhasil dihapus', 'success');
         }
         
+        // ==================== EDIT MODE MANAGEMENT ====================
         function activateEditMode(index) {
             isEditMode = true;
             currentEditIndex = index;
@@ -1599,12 +2135,13 @@
             document.getElementById('start-time').value = '08:00';
             document.getElementById('end-time').value = '17:00';
             document.getElementById('break-time').value = '1';
+            document.getElementById('day-type').value = 'kerja';
             document.getElementById('overtime').value = '';
             document.getElementById('note').value = '';
         }
 
-        // ==================== EVENT LISTENERS ====================
-        document.addEventListener('DOMContentLoaded', function() {
+        // ==================== INITIALIZATION ====================
+        function init() {
             // Setup profile edit feature
             setupProfileEdit();
             
@@ -1638,7 +2175,7 @@
             
             // Add first data
             document.getElementById('add-first-data').addEventListener('click', function() {
-                document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('date').scrollIntoView({ behavior: 'smooth' });
             });
             
             // Salary configuration
@@ -1663,27 +2200,30 @@
                 document.getElementById('delete-modal').style.display = 'flex';
             });
             
-            document.getElementById('export-data').addEventListener('click', function() {
-                if (attendanceData.length === 0) {
-                    showToast('Tidak ada data untuk diexport', 'error');
-                    return;
-                }
+            // Export data dengan summary
+            document.getElementById('export-data').addEventListener('click', exportDataWithSummary);
+            
+            // Backup data
+            document.getElementById('backup-data').addEventListener('click', function() {
+                const backupData = {
+                    attendanceData: attendanceData,
+                    monthlySalary: monthlySalary,
+                    exportDate: new Date().toISOString(),
+                    user: {
+                        name: document.getElementById('user-name').textContent,
+                        position: document.getElementById('user-position').textContent
+                    }
+                };
                 
-                let csvContent = "Tanggal,Hari,Jam Kerja,Istirahat,Lembur,Total Jam,Catatan,Status\n";
-                attendanceData.forEach(item => {
-                    const dayName = getDayName(item.date);
-                    const status = item.totalHours >= 8 ? 'Complete' : 'Pending';
-                    csvContent += `"${item.date}","${dayName}","${item.hours}",${item.breakTime},${item.overtime},${item.totalHours},"${item.note || ''}","${status}"\n`;
-                });
-                
-                const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
+                const dataStr = JSON.stringify(backupData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `worksync-export-${new Date().toISOString().split('T')[0]}.csv`;
+                link.download = `worksync-backup-${new Date().toISOString().split('T')[0]}.json`;
                 link.click();
                 
-                showToast('Data berhasil diexport', 'success');
+                showToast('Backup data berhasil dibuat!', 'success');
             });
             
             // Modal events
@@ -1698,18 +2238,30 @@
                 document.getElementById('delete-modal').style.display = 'none';
             });
             
-            document.querySelector('.close-modal').addEventListener('click', function() {
+            document.querySelector('#delete-modal .close-modal').addEventListener('click', function() {
                 document.getElementById('delete-modal').style.display = 'none';
+            });
+            
+            // Print data
+            document.getElementById('print-data').addEventListener('click', function() {
+                window.print();
             });
             
             // Close modal on ESC
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     document.getElementById('delete-modal').style.display = 'none';
+                    const calcModal = document.getElementById('calculation-modal');
+                    if (calcModal) calcModal.remove();
+                    const exportModal = document.getElementById('export-summary-modal');
+                    if (exportModal) exportModal.remove();
                     if (isEditMode) deactivateEditMode();
                 }
             });
-        });
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
